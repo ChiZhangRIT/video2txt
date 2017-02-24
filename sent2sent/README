@@ -1,0 +1,11 @@
+# This work is based on easy_seq2seq. Original code can be found here:
+# https://github.com/suriyadeepan/easy_seq2seq
+
+# Data preparation. To download original data:
+cd data/
+bash pull_data.sh
+# Note that some characters in the original data is not in the right codec. We are using our own dataset.
+# all_caption_Enc.txt and all_caption_Dec.txt are ~3.4M sentences pairs extracted from MSCOCO+Flickr30k+MSR-VTT+MSVD. As a reference, The full vocab size of _train_caption_Enc/Dec is 50283.
+
+# TensorBoard
+tensorboard --logdir=log_dir/

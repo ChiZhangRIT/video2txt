@@ -1,0 +1,5 @@
+sent2sent/data/
+sent2sent/model/
+*.pyc
+*.pkl
+*.npy
