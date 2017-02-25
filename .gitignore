@@ -1,0 +1,6 @@
+sent2sent/data/
+sent2sent/model/
+sent2sent/log_dir/
+*.pyc
+*.pkl
+*.npy
