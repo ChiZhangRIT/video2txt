@@ -185,7 +185,7 @@ def train():
 
       # Write logs at every iteration
       summary_writer.add_summary(step_loss_summary, model.global_step.eval())
-      summary_writer.add_summary(learning_rate_summary, model.learning_rate.eval())
+      summary_writer.add_summary(learning_rate_summary, model.global_step.eval())
 
       step_time += (time.time() - start_time) / gConfig['steps_per_checkpoint']
       loss += step_loss / gConfig['steps_per_checkpoint']
