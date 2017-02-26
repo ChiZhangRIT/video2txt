@@ -1,57 +1,40 @@
-# easy\_seq2seq
+## Sentence-to-sentence Model
 
-An implementation of Seq2Seq that actually works. I want to make it easy for people to train their own seq2seq model with any corpus. I am also adding the parameters of my trained model for people to just use it without training. If you have a model that works share your model params here, as external link or do a pull request. I have used Cornell Movie Dialog Corpus to train my model. A link to preprocessed data and scripts for preprocessing can be found in this repo.
+This work is based on easy_seq2seq. Original code can be found here: https://github.com/suriyadeepan/easy_seq2seq
 
-*Have Fun!*
+### Data preparation
 
-## Update 1.1.2017
-
-
-I have created another repository - [practical_seq2seq](https://github.com/suriyadeepan/practical_seq2seq) to experiment with the seq2seq model. The new model trained on Twitter chat log and Cornell Movie Dialog corpus performs well. I wrote an article - [Practical seq2seq](http://suriyadeepan.github.io/2016-12-31-practical-seq2seq/), explaining the code.
-
-Happy New Year, **2017**
-
-
-## Setup
-
-
-* Create temporary working directory prior to training
-
-```bash
-mkdir working_dir
+Create directory
 ```
-
-* Download test/train data from Cornell Movie Dialog Corpus
-
-```bash
+mkdir log_dir
+mkdir model
+```
+Download original data
+```
 cd data/
 bash pull_data.sh
 ```
+Note that some characters in the original data is not in the right codec. We are using our own dataset.
 
-## Training
+All sentences pairs were extracted from MSCOCO + Flickr30k + MSR-VTT + MSVD.
 
-```bash
-# edit seq2seq.ini file to set 
-#		mode = train
-python execute.py
-# or use custom ini file
-#		python execute.py my_custom_conf.ini
+### Training
+
+Edit *seq2seq.ini* file to set *mode = train*
 ```
-
-## Testing
-
-```bash
-# edit seq2seq.ini file to set 
-#		mode = test
 python execute.py
 ```
 
-## Serve
+### inference
 
-```bash
-# configuration : seq2seq_serve.ini
-python ui/app.py
-# wait until this message shows up
-#		"Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)"
-# open up the address in browser, chat with the bot
+Edit *seq2seq.ini* file to set *mode = test*
+```
+python execute.py
+```
+
+### TensorBoard
+
+Run a TensorBoard server in a separate process for real-time monitoring of training progress and evaluation metrics.
+```
+tensorboard --logdir=log_dir/ --port=6364
 ```
