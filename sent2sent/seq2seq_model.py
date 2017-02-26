@@ -168,6 +168,16 @@ class Seq2SeqModel(object):
 
     # Gradients and SGD update operation for training the model.
     params = tf.trainable_variables()
+
+    # Observe embedding matrix, if needed
+    self.DEBUG = 0
+    for var in params:
+        # print(var.name)  # Debug
+        if var.name == 'embedding_attention_seq2seq/RNN/EmbeddingWrapper/embedding:0':
+            self.embedding_op = var
+            self.DEBUG = 1
+            break
+
     if not forward_only:
       self.gradient_norms = []
       self.updates = []
@@ -237,10 +247,18 @@ class Seq2SeqModel(object):
         output_feed.append(self.outputs[bucket_id][l])
 
     merged_summary_op = tf.summary.merge_all()
-    outputs = session.run(output_feed, input_feed)
+    # outputs = session.run(output_feed, input_feed)
+    if self.DEBUG == 1:  # Debug mode
+        outputs, embedding_matrix = session.run([output_feed, self.embedding_op], input_feed)
+    else:
+        outputs = session.run(output_feed, input_feed)
 
     if not forward_only:
-      return outputs[1], outputs[2], None  # Gradient norm, loss, no outputs.
+    #   return outputs[1], outputs[2], None,  # Gradient norm, loss, no outputs.
+        if self.DEBUG == 1:  # Debug mode
+            return outputs[1], outputs[2], None, embedding_matrix  # Gradient norm, loss, no outputs, embedding matrix.
+        else:
+            return outputs[1], outputs[2], None, None # Gradient norm, loss, no outputs.
     else:
       return None, outputs[0], outputs[1:]  # No gradient norm, loss, outputs.
 

@@ -44,6 +44,7 @@ from __future__ import print_function
 
 import collections
 import math
+import tensorflow as tf
 import pdb
 
 from tensorflow.python.framework import ops
@@ -758,9 +759,8 @@ class EmbeddingWrapper(RNNCell):
         # If initializer is a constant, do not specify shape.
         embedding = vs.get_variable(
             "embedding", #[self._embedding_classes, self._embedding_size],
-            initializer=initializer, trainable=False,
+            initializer=initializer, trainable=True,
             dtype=data_type)
-
         embedded = embedding_ops.embedding_lookup(
             embedding, array_ops.reshape(inputs, [-1]))
     return self._cell(embedded, state)

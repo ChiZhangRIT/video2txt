@@ -173,9 +173,12 @@ def train():
       start_time = time.time()
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           train_set, bucket_id)
-      _, step_loss, _ = model.step(sess, encoder_inputs, decoder_inputs,
+    #   _, step_loss, _ = model.step(sess, encoder_inputs, decoder_inputs,
+    #                                target_weights, bucket_id, False)
+      _, step_loss, _, embedding_matrix = model.step(sess, encoder_inputs, decoder_inputs,
                                    target_weights, bucket_id, False)
-
+      pdb.set_trace()
+      
       step_loss_value = step_loss_summary.value.add()
       step_loss_value.tag = "step loss"
       step_loss_value.simple_value = step_loss.astype(float)

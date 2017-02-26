@@ -4,3 +4,5 @@ sent2sent/log_dir/
 *.pyc
 *.pkl
 *.npy
+!sent2sent/data/_toy_Dec.txt
+!sent2sent/data/_toy_Enc.txt
