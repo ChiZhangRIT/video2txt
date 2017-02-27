@@ -337,7 +337,7 @@ if __name__ == '__main__':
         gConfig = get_config()
 
     if not tf.gfile.Exists(gConfig['log_dir']):
-        tf.gfile.MakeDirs(gConfig['log_dir'])                                                  
+        tf.gfile.MakeDirs(gConfig['log_dir'])
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 
