@@ -20,10 +20,11 @@ All sentences pairs were extracted from MSCOCO + Flickr30k + MSR-VTT + MSVD.
 
 ### Training
 
-Edit *seq2seq.ini* file to set *mode = train*
+Edit *seq2seq.ini* file to set *mode = train*. To use pre-trained embedding, set *pretrained_embedding = true*
 ```
 python execute.py
 ```
+Note: Set *trainable=True* in *embedding = vs.get_variable(...)* (line 762) in *embedding/rnn_cell.py* to enable training on pre-trained embedding.
 
 ### inference
 

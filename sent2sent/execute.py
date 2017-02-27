@@ -168,27 +168,31 @@ def train():
 
       step_loss_summary = tf.Summary()
       learning_rate_summary = tf.Summary()
+    #   embedding_summary = tf.Summary()  # Debug
 
       # Get a batch and make a step.
       start_time = time.time()
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           train_set, bucket_id)
-    #   _, step_loss, _ = model.step(sess, encoder_inputs, decoder_inputs,
-    #                                target_weights, bucket_id, False)
-      _, step_loss, _, embedding_matrix = model.step(sess, encoder_inputs, decoder_inputs,
+      _, step_loss, _ = model.step(sess, encoder_inputs, decoder_inputs,
                                    target_weights, bucket_id, False)
-      pdb.set_trace()
-      
+    #   _, step_loss, _, embedding_matrix = model.step(sess, encoder_inputs, decoder_inputs,
+    #                                target_weights, bucket_id, False)
+
       step_loss_value = step_loss_summary.value.add()
       step_loss_value.tag = "step loss"
       step_loss_value.simple_value = step_loss.astype(float)
       learning_rate_value = learning_rate_summary.value.add()
       learning_rate_value.tag = "learning rate"
       learning_rate_value.simple_value = model.learning_rate.eval().astype(float)
+    #   embedding_value = embedding_summary.value.add()
+    #   embedding_value.tag = "embedding matrix mean"
+    #   embedding_value.simple_value = np.mean(embedding_matrix).astype(float)
 
       # Write logs at every iteration
       summary_writer.add_summary(step_loss_summary, model.global_step.eval())
       summary_writer.add_summary(learning_rate_summary, model.global_step.eval())
+    #   summary_writer.add_summary(embedding_summary, model.global_step.eval())
 
       step_time += (time.time() - start_time) / gConfig['steps_per_checkpoint']
       loss += step_loss / gConfig['steps_per_checkpoint']

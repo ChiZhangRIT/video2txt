@@ -758,7 +758,7 @@ class EmbeddingWrapper(RNNCell):
 
         # If initializer is a constant, do not specify shape.
         embedding = vs.get_variable(
-            "embedding", #[self._embedding_classes, self._embedding_size],
+            "embedding", 
             initializer=initializer, trainable=True,
             dtype=data_type)
         embedded = embedding_ops.embedding_lookup(
