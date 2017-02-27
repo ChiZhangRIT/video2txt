@@ -336,9 +336,8 @@ if __name__ == '__main__':
         # get configuration from seq2seq.ini
         gConfig = get_config()
 
-    if tf.gfile.Exists(gConfig['log_dir']):
-        tf.gfile.DeleteRecursively(gConfig['log_dir'])
-    tf.gfile.MakeDirs(gConfig['log_dir'])                                                  
+    if not tf.gfile.Exists(gConfig['log_dir']):
+        tf.gfile.MakeDirs(gConfig['log_dir'])                                                  
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 
