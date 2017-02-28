@@ -26,7 +26,14 @@ python execute.py
 ```
 Note: Set *trainable=True* in *embedding = vs.get_variable(...)* (line 762) in *embedding/rnn_cell.py* to enable training on pre-trained embedding.
 
-### inference
+### Evaluation
+
+Edit *seq2seq.ini* file to set *mode = eval*
+```
+python execute.py
+```
+
+### Inference
 
 Edit *seq2seq.ini* file to set *mode = test*
 ```
