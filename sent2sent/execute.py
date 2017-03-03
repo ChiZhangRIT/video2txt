@@ -161,7 +161,9 @@ def train():
     step_time, loss = 0.0, 0.0
     current_step = 0
     previous_losses = []
-    while True:
+    # while True:
+    while model.global_step.eval() <= 200000:
+
       # Choose a bucket according to data distribution. We pick a random number
       # in [0, 1] and use the corresponding interval in train_buckets_scale.
       random_number_01 = np.random.random_sample()
@@ -282,11 +284,16 @@ def scorer():
     model.batch_size = 1  # We decode one sentence at a time.
     output_captions = []
     for sentence in test_captions:
+      
       # Get token-ids for the input sentence.
       token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
       # Which bucket does it belong to?
-      bucket_id = min([b for b in xrange(len(_buckets))
-                       if _buckets[b][0] > len(token_ids)])
+      token_ids = token_ids[:40]
+      try:
+        bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
+      except:
+        # if sentence length greater than 50
+        pdb.set_trace()
       # Get a 1-element batch to feed the sentence to the model.
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           {bucket_id: [(token_ids, [])]}, bucket_id)
@@ -380,9 +387,9 @@ if __name__ == '__main__':
         # get configuration from seq2seq.ini
         gConfig = get_config()
 
-    if tf.gfile.Exists(gConfig['log_dir']):
-        tf.gfile.DeleteRecursively(gConfig['log_dir'])
-    tf.gfile.MakeDirs(gConfig['log_dir'])
+    if not tf.gfile.Exists(gConfig['log_dir']):
+        # tf.gfile.DeleteRecursively(gConfig['log_dir'])
+        tf.gfile.MakeDirs(gConfig['log_dir'])
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 
