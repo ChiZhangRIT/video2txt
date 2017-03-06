@@ -27,6 +27,8 @@ import pdb
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
+from pycocoevalcap.eval import COCOScorer
+import pickle as pkl
 
 import data_utils
 import seq2seq_model
@@ -53,18 +55,6 @@ def get_config(config_file='seq2seq.ini'):
 # We use a number of buckets and pad to the closest one for efficiency.
 # See seq2seq_model.Seq2SeqModel for details of how they work.
 _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
-
-def variable_summaries(var):
-    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
-    with tf.name_scope('summaries'):
-        mean = tf.reduce_mean(var)
-        tf.summary.scalar('mean', mean)
-        with tf.name_scope('stddev'):
-            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-        tf.summary.scalar('stddev', stddev)
-        tf.summary.scalar('max', tf.reduce_max(var))
-        tf.summary.scalar('min', tf.reduce_min(var))
-        tf.summary.histogram('histogram', var)
 
 
 def read_data(source_path, target_path, max_size=None):
@@ -159,7 +149,7 @@ def train():
     step_time, loss = 0.0, 0.0
     current_step = 0
     previous_losses = []
-    while True:
+    while model.global_step.eval() <= gConfig['max_num_steps']:
       # Choose a bucket according to data distribution. We pick a random number
       # in [0, 1] and use the corresponding interval in train_buckets_scale.
       random_number_01 = np.random.random_sample()
@@ -168,27 +158,31 @@ def train():
 
       step_loss_summary = tf.Summary()
       learning_rate_summary = tf.Summary()
+    #   embedding_summary = tf.Summary()  # Debug
 
       # Get a batch and make a step.
       start_time = time.time()
       encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           train_set, bucket_id)
-    #   _, step_loss, _ = model.step(sess, encoder_inputs, decoder_inputs,
-    #                                target_weights, bucket_id, False)
-      _, step_loss, _, embedding_matrix = model.step(sess, encoder_inputs, decoder_inputs,
+      _, step_loss, _ = model.step(sess, encoder_inputs, decoder_inputs,
                                    target_weights, bucket_id, False)
-      pdb.set_trace()
-      
+    #   _, step_loss, _, embedding_matrix = model.step(sess, encoder_inputs, decoder_inputs,
+    #                                target_weights, bucket_id, False)
+
       step_loss_value = step_loss_summary.value.add()
       step_loss_value.tag = "step loss"
       step_loss_value.simple_value = step_loss.astype(float)
       learning_rate_value = learning_rate_summary.value.add()
       learning_rate_value.tag = "learning rate"
       learning_rate_value.simple_value = model.learning_rate.eval().astype(float)
+    #   embedding_value = embedding_summary.value.add()
+    #   embedding_value.tag = "embedding matrix mean"
+    #   embedding_value.simple_value = np.mean(embedding_matrix).astype(float)
 
       # Write logs at every iteration
       summary_writer.add_summary(step_loss_summary, model.global_step.eval())
       summary_writer.add_summary(learning_rate_summary, model.global_step.eval())
+    #   summary_writer.add_summary(embedding_summary, model.global_step.eval())
 
       step_time += (time.time() - start_time) / gConfig['steps_per_checkpoint']
       loss += step_loss / gConfig['steps_per_checkpoint']
@@ -264,6 +258,55 @@ def decode():
       sentence = sys.stdin.readline()
 
 
+def scorer():
+  with tf.Session() as sess:
+    # Create model and load parameters.
+    model = create_model(sess, True)
+
+    # Load vocabularies.
+    enc_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.enc" % gConfig['enc_vocab_size'])
+    dec_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.dec" % gConfig['dec_vocab_size'])
+
+    enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
+    _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
+
+    test_file = os.path.join(gConfig['encoder_test_file'])
+    test_captions = open(test_file,'r').readlines()
+
+    model.batch_size = 1  # We decode one sentence at a time.
+    output_captions = []
+    for sentence in test_captions:
+      # Get token-ids for the input sentence.
+      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
+      # Which bucket does it belong to?
+      bucket_id = min([b for b in xrange(len(_buckets))
+                       if _buckets[b][0] > len(token_ids)])
+      # Get a 1-element batch to feed the sentence to the model.
+      encoder_inputs, decoder_inputs, target_weights = model.get_batch(
+          {bucket_id: [(token_ids, [])]}, bucket_id)
+      # Get output logits for the sentence.
+      _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
+                                       target_weights, bucket_id, True)
+      # This is a greedy decoder - outputs are just argmaxes of output_logits.
+      outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
+      # If there is an EOS symbol in outputs, cut them at that point.
+      if data_utils.EOS_ID in outputs:
+        outputs = outputs[:outputs.index(data_utils.EOS_ID)]
+      # Print out French sentence corresponding to outputs.
+      output_caption = " ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in outputs])
+      output_captions.append(output_caption)
+    # pdb.set_trace()
+    gt_info = pkl.load(open(test_file[:-4]+'.pkl','r'))
+
+    id_list = gt_info['ids']
+    gt_dict = gt_info['gt']
+    pred_dict = {idx: [{'image_id':idx,'caption':sent}] for idx, sent in enumerate(output_captions)}
+    with open(gConfig['model_directory']+gConfig['encoder_test_file'].split('/')[-1][:-4]+'_output.txt','w') as f:
+        [f.write(i+'\n') for i in output_captions]
+    scorer = COCOScorer()
+    total_score = scorer.score(gt_dict, pred_dict, id_list)
+
+
 def self_test():
   """Test the translation model."""
   with tf.Session() as sess:
@@ -332,9 +375,8 @@ if __name__ == '__main__':
         # get configuration from seq2seq.ini
         gConfig = get_config()
 
-    if tf.gfile.Exists(gConfig['log_dir']):
-        tf.gfile.DeleteRecursively(gConfig['log_dir'])
-    tf.gfile.MakeDirs(gConfig['log_dir'])                                                  
+    if not tf.gfile.Exists(gConfig['log_dir']):
+        tf.gfile.MakeDirs(gConfig['log_dir'])
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 
@@ -344,6 +386,8 @@ if __name__ == '__main__':
     elif gConfig['mode'] == 'test':
         # interactive decode
         decode()
+    elif gConfig['mode'] == 'eval':
+        scorer()
     else:
         # wrong way to execute "serve"
         #   Use : >> python ui/app.py
