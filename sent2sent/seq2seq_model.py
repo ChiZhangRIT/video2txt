@@ -50,7 +50,8 @@ class Seq2SeqModel(object):
                learning_rate_decay_factor, use_lstm=False,
                num_samples=512, forward_only=False,
                use_pretrained_embedding=False,
-               pretrained_embedding_path=None):
+               pretrained_embedding_path=None,
+               pretrained_projection_path=None):
     """Create the model.
 
     Args:
@@ -72,6 +73,9 @@ class Seq2SeqModel(object):
       use_lstm: if true, we use LSTM cells instead of GRU cells.
       num_samples: number of samples for sampled softmax.
       forward_only: if set, we do not construct the backward pass in the model.
+      use_pretrained_embedding: if true, use GloVe embedding.
+      pretrained_embedding_path: path to GloVe embedding,
+      pretrained_projection_path: path to projection matrix in decoder.
     """
     self.source_vocab_size = source_vocab_size
     self.target_vocab_size = target_vocab_size
@@ -88,16 +92,23 @@ class Seq2SeqModel(object):
     softmax_loss_function = None
     # Sampled softmax only makes sense if we sample less than vocabulary size.
     if num_samples > 0 and num_samples < self.target_vocab_size:
-      w = tf.get_variable("proj_w", [size, self.target_vocab_size])
-      w_t = tf.transpose(w)
-      b = tf.get_variable("proj_b", [self.target_vocab_size])
-      output_projection = (w, b)
+        if not self.use_pretrained_embedding:
+            w = tf.get_variable("proj_w", [size, self.target_vocab_size])
+            w_t = tf.transpose(w)
+            b = tf.get_variable("proj_b", [self.target_vocab_size])
+        else:
+            w_init = tf.constant(np.load(pretrained_projection_path))
+            w = tf.get_variable("proj_w", initializer=w_init, trainable=False)
+            w_t = tf.transpose(w)
+            b_init = tf.zeros([self.target_vocab_size])
+            b = tf.get_variable("proj_b", initializer=b_init, trainable=False)
+        output_projection = (w, b)
 
-      def sampled_loss(inputs, labels):
-        labels = tf.reshape(labels, [-1, 1])
-        return tf.nn.sampled_softmax_loss(w_t, b, inputs, labels, num_samples,
+        def sampled_loss(inputs, labels):
+            labels = tf.reshape(labels, [-1, 1])
+            return tf.nn.sampled_softmax_loss(w_t, b, inputs, labels, num_samples,
                 self.target_vocab_size)
-      softmax_loss_function = sampled_loss
+        softmax_loss_function = sampled_loss
 
     # Create the internal multi-layer cell for our RNN.
     single_cell = tf.nn.rnn_cell.GRUCell(size)
