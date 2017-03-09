@@ -27,7 +27,6 @@ import pdb
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-from pycocoevalcap.eval import COCOScorer
 import pickle as pkl
 
 import data_utils
@@ -281,46 +280,40 @@ def scorer():
     enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
     _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
 
-    test_file = os.path.join(gConfig['sentences_file'])
-    test_captions = open(test_file,'r').readlines()
+    sentences_file = os.path.join(gConfig['sentences_file'])
+    sentences = open(sentences_file,'r').readlines()
 
     model.batch_size = 1  # We decode one sentence at a time.
-    output_captions = []
 
-    sent2vec_file = open(gConfig['sent2vec_saving_dorectory'] + 'vectors.txt', 'w')
+    # sent2vec_file = open(gConfig['vector_file'], 'w')
+    vectors = {}
+    id_counter = 0
+    for sentence in sentences:
+        # Get token-ids for the input sentence.
+        token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
+        # Which bucket does it belong to?
+        token_ids = token_ids[:40]
+        try:
+            bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
+        except:
+            # if sentence length greater than 50
+            pdb.set_trace()
 
-    for sentence in test_captions:
-      # Get token-ids for the input sentence.
-      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
-      # Which bucket does it belong to?
-      token_ids = token_ids[:40]
-      try:
-        bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
-      except:
-        # if sentence length greater than 50
-        pdb.set_trace()
-
-      # Get a 1-element batch to feed the sentence to the model.
-      encoder_inputs, decoder_inputs, target_weights = model.get_batch(
+        # Get a 1-element batch to feed the sentence to the model.
+        encoder_inputs, decoder_inputs, target_weights = model.get_batch(
           {bucket_id: [(token_ids, [])]}, bucket_id)
 
-      # Get output logits for the sentence.
-    #   _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
-    #                                    target_weights, bucket_id, True)
-      sent2vec = model.step(sess, encoder_inputs, decoder_inputs,
+        # Get output logits for the sentence.
+        sent2vec = model.step(sess, encoder_inputs, decoder_inputs,
                                        target_weights, bucket_id, True)
 
-    #   sent2vec_file.write( np.squeeze(sent2vec))
-      np.savetxt(gConfig['sent2vec_saving_dorectory'] + 'vectors.txt', np.squeeze(sent2vec))
-      #
-      pdb.set_trace()
+        # save vector to dict
+        vectors[id_counter] = np.squeeze(sent2vec)
+        id_counter += 1
 
-    sent2vec_file.close()
-    pdb.set_trace()
-
-    # test vectors file
-    read = open(gConfig['sent2vec_saving_dorectory'] + 'vectors.txt', 'r')
-    pdb.set_trace()
+    with open(gConfig['vector_file'], 'wb') as f:
+        pkl.dump(vectors, f)
+    print('sent2vec saved in %s' % gConfig['vector_file'])
 
 
 def self_test():
@@ -390,9 +383,6 @@ if __name__ == '__main__':
     else:
         # get configuration from seq2seq.ini
         gConfig = get_config()
-
-    if not tf.gfile.Exists(gConfig['sent2vec_saving_dorectory']):
-        tf.gfile.MakeDirs(gConfig['sent2vec_saving_dorectory'])
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 

@@ -4,11 +4,11 @@ This work is based on easy_seq2seq. Original code can be found here: https://git
 
 ### Data preparation
 
-Put the sentences data in *sentences/* directory
 ```
 mkdir sentences
 mkdir model
 ```
+Put the model and sentences data in *model/* and *sentences/* directory
 
 ### Generating vectors from sentences
 
