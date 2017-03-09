@@ -6,3 +6,8 @@ sent2sent/log_dir/
 *.npy
 !sent2sent/data/_toy_Dec.txt
 !sent2sent/data/_toy_Enc.txt
+
+sent2vec/sentences/
+sent2vec/model/
+sent2vec/vectors/
+
