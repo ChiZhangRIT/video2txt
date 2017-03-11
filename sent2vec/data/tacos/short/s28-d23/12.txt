@@ -1,0 +1,5 @@
+the person removed a cutting board
+the person placed a cutting board on the counter
+the person removed a carrot from the refrigerator
+the person peeled the carrot
+the person sliced up the carrot

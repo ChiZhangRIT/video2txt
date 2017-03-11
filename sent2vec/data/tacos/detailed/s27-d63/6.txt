@@ -1,0 +1,9 @@
+the person removed a loaf of bread from the cabinet
+the person removed a toaster from the drawer
+the person plugged the toaster into the outlet
+the person opened the loaf of bread
+the person placed two slices of bread into the toaster
+the person put the bread back in the cabinet
+the person took out a plate from the cabinet
+the person placed the pieces of toast onto the plate
+the person placed the toaster back in the drawer

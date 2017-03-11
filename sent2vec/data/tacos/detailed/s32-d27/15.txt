@@ -1,0 +1,20 @@
+the person entered a kitchen ,
+the person removed an onion from the cabinet ,
+the person washed an onion in the sink
+the person prepared a cutting board and knife on the counter ,
+the person used the knife to cut off the inedible parts of the onion ,
+the person peeled the onion
+the person diced the onion ,
+the person mixed the onion in a bowl with water ,
+the person added spice
+the person rinsed the onion mixture
+the person drained the water from the bowl
+the person put a pan on the stove top ,
+the person removed butter from the refridgerator ,
+the person used a wooden spoon
+the person used a knife to slice some butter off
+the person melted the butter in the pan ,
+the person added onion to the pan ,
+the onions cooked
+the person added spices
+the person transferred the onions from the pan to a plate

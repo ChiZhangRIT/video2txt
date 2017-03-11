@@ -1,0 +1,6 @@
+the person entered a kitchen set
+the person removed a toaster from a cabinet
+the person got some bread from the refrigerator
+the person plugged the toaster in
+the person unwrapped the bread
+the person proceeded to toast two pieces of bread

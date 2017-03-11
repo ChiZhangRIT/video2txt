@@ -1,0 +1,13 @@
+the person removed a knife from the drawer
+the person removed a cutting board from the drawer
+the person removed a bowl from the drawer
+the person removed an orange from the fridge
+the person peeled the orange
+the person pulled the orange pieces apart
+the person diced the orange
+the person placed the orange in the bowl
+the person removed a liquid container from the fridge
+the person poured the liquid over the orange
+the person removed a second liquid container from the fridge
+the person poured the liquid over the orange
+the person mixed the orange and liquid

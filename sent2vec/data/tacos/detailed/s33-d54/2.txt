@@ -1,0 +1,21 @@
+the person walked into the kitchen
+the person removed a kitchen utensil from the drawer
+the person closed the drawer
+the person walked over to the refrigerator
+the person removed a mango
+the person closed the refrigerator
+the person opened up the cabinet
+the person removed two plates
+the person closed the cabinet
+the person waked over to the counter
+the person opened the drawer again
+the person removed a knife
+the person peeled the mango
+the person sliced the mango over the other plate
+the person walked over to the cabinet
+the person removed another plate
+the person walked back over to the counter
+the person sliced the mango further
+the person rinsed off the plate in the sink
+the person tossed the scraps in the trash can
+the person dried off his hands

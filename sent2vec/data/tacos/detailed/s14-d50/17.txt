@@ -1,0 +1,12 @@
+the person entered the kitchen room
+the person opened the cupboard
+the person took two bowled from the cupboard
+the person placed two bowled on the prep area
+the person opened the refrigerator
+the person took an egg from the refrigerator
+the person broke the egg
+the person extracted the yolk fom the egg to the bowl
+the person put the outer shell of egg in a dustbin
+the person washed his hands in the sink
+the person wiped his hands in a cloth
+the person went out of the kitchen

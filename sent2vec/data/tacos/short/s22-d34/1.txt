@@ -1,0 +1,3 @@
+the person selected a piece of fruit
+the person washed the fruit
+the person chopped the fruit

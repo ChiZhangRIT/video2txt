@@ -1,0 +1,15 @@
+the person entered the kitchen
+the person took the tea kettle and electric hot plate from the drawer
+the person filled the tea kettle with water
+the person placed the tea kettle on the hot plate
+the person plugged in the hot plate
+the person took a teapot from the drawer
+the person took a bag of loose tea from the cabinet
+the person took a tea strainer from the drawer
+the person scooped the loose tea into the strainer
+the person put the strainer into the teapot
+the person took a mug from the cabinet
+the person poured the heated water into the teapot
+the person unplugged the hot plate
+the person put the hot plate away with the tea kettle
+the person poured the tea into the mug

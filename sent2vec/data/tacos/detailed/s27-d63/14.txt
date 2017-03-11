@@ -1,0 +1,14 @@
+the person grabbed a loaf of bread
+the person placed the bread on the counter
+the person grabbed a toaster
+the person placed a toaster on the counter
+the person plugged the toaster in
+the person placed two pieces of bread in the toaster
+the person turned the toaster on
+the person waited for the toaster to finish
+the person wrapped the loaf of bread up
+the person placed the loaf back where he got the loaf
+the person released the bread from the toaster
+the person placed the toast on a plate
+the person unplugged the toaster
+the person placed the toaster back where he grabbed the toaster from

@@ -1,0 +1,17 @@
+the person entered the kitchen
+the person retrieved a cutting board from the drawer
+the person placed a cutting board on the counter
+the person opened the refrigerator
+the person retrieved a fig
+the person smelled the fig ,
+the person washed the fig
+the person shook the fig dry
+the person placed the fig on the cutting board
+the person retrieved a knife from the drawer
+the person cut the ends off the fig ,
+the person cut the fig in half and again into fourths
+the person retrieved the ends of the fig
+the person threw the ends of the fig into the trash
+the person retrieved a plate from the cupboard
+the person placed a plate on the counter
+the person individually placed each fourth of the fig onto the plate

@@ -1,0 +1,20 @@
+the person entered the room
+the person opened a drawer
+the person took out a trencher
+the person opened another drawer
+the person took a knife
+the person opened a closet
+the person grabbed a ginger
+the person opened another closet
+the person took a medium sized plate
+the person washed the plate into the sink
+the person cut the ginger in two pieces
+the person took one of the piece
+the person put one of the piece back into the closet
+the person took the other piece
+the person washed the other piece into the sink
+the person cut the ginger in to halfs
+the person sliced each half into thin slices
+the person sliced the thin slices all again into french fries shaped slices
+the person put the slices on the plate
+the person threw the rested in the garbage

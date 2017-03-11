@@ -1,0 +1,47 @@
+the person entered the kitchen ,
+the person removed a clove of garlic from the pantry ,
+the person removed a cutting board from a drawer ,
+the person placed the cutting board on the counter ,
+the person removed a knife from another drawer ,
+the person placed the knife on the cutting board
+the person removed the garlic from its bag
+the person peeled the outer skin off by hand ,
+the person placed the peels on the counter
+the person began separating the sections of the clove peeling , letting the sections fall to the counter with the peels
+the person stopped peeling and separating ,
+the person removed two sections from the pile of peels ,
+the person placed the sections on the cutting board
+the person put the remainder of the clove back in the pantry ,
+the person returned to the cutting board ,
+the person began slicing a garlic section
+the person stopped ,
+the person put the knife down on the counter ,
+the person placed the peels on the cutting board ,
+the person scraped everything on the cutting board into the trash can by hand
+the person put the cutting board in the sink ,
+the person rinsed his scraping hand and the board under the faucet ,
+the person wiped the counter where he had been working with a dishrag ,
+the person rinsed the towel under the faucet ,
+the person rinsed the towel under the faucet ,
+the person hung the towel back up on the faucet
+the person placed the cutting board back on the counter beside the knife ,
+the person opened the pantry ,
+the person removed another section of the garlic clove ,
+closed the pantry ,
+the person returned to the cutting board ,
+the person removed a piece of peel from the new garlic section ,
+the person placed a piece of peel on the counter ,
+the person put the knife back in the drawer ,
+the person selected a new knife from the same drawer
+the person placed the new knife on the counter ,
+the person finished peeling the section by hand ,
+the person placed the section on the cutting board ,
+the person sliced the section finely lengthwise and crosswise ,
+the person stopped occasionally to scrape garlic pieces off of the knife blade by hand
+the person placed the knife on the cutting board ,
+the person scraped the peels off of the counter by hand into his other hand ,
+the person threw the peels in the trash
+the person rinsed his hands under the faucet ,
+the person stopped once to scrape a last bit of debris into the sink from the counter ,
+the person dried his hands with a dishtowel
+the person began to walk out of the kitchen

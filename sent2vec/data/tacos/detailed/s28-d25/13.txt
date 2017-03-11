@@ -1,0 +1,16 @@
+the person entered the kitchen
+the person took a cutting board out of a drawer
+the person selected a knife from the drawer
+the person placed a knife on the board
+the person took bread out of the refrigerator
+the person removed the bread from the plastic bag
+the person cut two slices of bread
+the person returned the bread to the bag
+the person put the bag in the refrigerator
+the person took a plate out
+the person placed the bread on the plate
+the person washed the knife
+the person replaced the knife in the drawer
+the person swept up the crumbs
+the person threw the crumbs away
+the person replaced the cutting board in the drawer

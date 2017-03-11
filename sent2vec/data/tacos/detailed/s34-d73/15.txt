@@ -1,0 +1,27 @@
+the person reached into a cupboard
+the person pulled out a bag
+the person reached into the adjacent cupboard
+the person pulled out a cup and small plate
+the person put the plate onto a table
+the person put the cup into the plate
+the person pulled out a drawer ,
+the person removed a spoon from a drawer ,
+the person put the spoon into the cup
+the person reached down
+the person pulled out a tea maker
+the person placed a tea maker onto the table
+the person looked through several drawers
+the person found a capsule
+the person took the tea maker
+the person filled the tea maker with water
+the person plugged the tea maker into the power fixture
+the person took a scoop out of the bag with a small spoon
+the person put a scoop into the small capsule
+the person placed the filled capsule into the pitcher
+the person poured the water from inside the tea maker into the pitcher
+the person poured the remaining water that was left into the sink
+the person put the tea maker back where the tea maker was
+the person put the bag of tea and sugar carton into the cupboard
+the person poured the finished tea into the cup ,
+the person stirred the finished tea ,
+the person wiped his hands

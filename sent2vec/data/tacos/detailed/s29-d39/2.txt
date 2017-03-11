@@ -1,0 +1,39 @@
+the person entered the kitchen ,
+the person removed a wooden cutting board and a knife from a drawer ,
+the person placed a wooden cutting board and a knife on the counter
+the person removed a green onion from the refrigerator ,
+the person rinsed the greens in the sink ,
+shook of the excess water ,
+the person peeled off the top two layers of the stalk
+the person placed the onion on the cutting board ,
+the person sliced off a roughly four-inch section including the base ,
+the person sliced a roughly one-inch section from the four-inch section including the base ,
+the person set the rest aside
+the person cut the one-inch section into very thin slices ,
+the person began thinly slicing the portion of stalk still attached to the greens
+the person stopped slicing where the stalk began to branch into the greens
+the person sliced up the set-aside four-inch section of stalk
+the person scraped off the slices sticking to the knife by hand ,
+the person removed a frying pan from a cabinet ,
+the person placed a frying pan on a burner of the stove
+the person turned on the burner ,
+the person removed a bottle of olive oil from the pantry ,
+the person poured a small amount into the pan
+the person placed the olive oil on the counter ,
+the person checked the heat of the pan by holding a hand over the pan ,
+the person tipped the pan to spread the oil around
+the person moved the board closer to the stove ,
+the person checked the heat once more by placing a single slice in the pan ,
+the person used the knife to scrape the onion slices into the pan
+the person removed a wooden spatula from the drawer
+the person began moving the slices around the pan to cook them evenly
+the person stopped once to add more oil
+the person moved the pan to a cool burner
+the person turned off the burner
+the person removed a plate from a cabinet ,
+the person placed a plate on the counter to the burner where the pan was ,
+the person scraped the onion slices onto the plate using the spatula
+the person placed the spatula on the pan
+the person moved the pan to another cool burner ,
+the person set the plate with the onions on the counter by the cutting board ,
+the person moved to stand by the plate

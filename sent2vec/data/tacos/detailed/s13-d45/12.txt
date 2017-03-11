@@ -1,0 +1,10 @@
+the person entered the kitchen
+the person removed a cutting board from the drawer
+the person removed a knife from the drawer
+the person took a plate from the cabinet
+the person retrieved a red bell pepper from the pantry
+the person washed a red bell pepper
+the person pulled the stem out of the pepper
+the person threw the stem away
+the person sliced the bell pepper into smaller pieces
+the person placed the bell pepper slices onto the plate

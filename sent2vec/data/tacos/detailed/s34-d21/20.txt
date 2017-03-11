@@ -1,0 +1,15 @@
+the person entered the kitchen
+the person took a knife and peeler from the drawer
+the person took a cutting board from the drawer
+the person took a cucumber from the refrigerator
+the person rinsed the cucumber
+the person cut the cucumber in half
+the person peeled one half of the cucumber with the peeler
+the person thinly sliced the peeled cucumber
+the person diced each of the slices of cucumber
+the person put the diced cucumber into a bowl
+the person peeled the other half of the cucumber
+the person sliced the cucumber
+the person diced each of the slices
+the person put the slices in the bowl
+the person rinsed the cutting board

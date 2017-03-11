@@ -1,0 +1,29 @@
+the person entered the kitchen
+the person grabbed two onions from a cabinet
+the person grabbed a knife from a drawer
+the person peeled one onion over the trash
+the person grabbed the second onion
+the person peeled the second onion over the trash
+the person put the second onion in the sink
+the person grabbed a cutting board from a drawer
+the person cut one onion in small pieces
+the person grabbed a pan from a drawer ,
+the person put a pan on the stove
+the person put the onion pieces on a pan
+the person grabbed the second onion
+the person cut the second onion into small pieces
+the person threw a small piece of onion in the trash
+the person put the rest of the onion pieces on the pan
+the person turned on the stove
+the person grabbed oil from a cabinet
+the person poured the oil over the onions
+the person grabbed a wooden spatula from a drawer
+the person stirred the onions in the pan
+the person threw the onion excess on the knife in the trash
+the person washed the knife
+the person stirred the onions with the spatula
+the person changed the temperature of the stove
+the person stirred the onions with the spatula
+the person turned off the stove
+the person stirred the onions with the spatula
+the person washed the spatula and cutting board at the sink

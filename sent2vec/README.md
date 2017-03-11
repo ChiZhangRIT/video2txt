@@ -8,7 +8,9 @@ This work is based on easy_seq2seq. Original code can be found here: https://git
 mkdir sentences
 mkdir model
 ```
-Put the model and sentences data in *model/* and *sentences/* directory
+Put the model and sentences data in *model/* and *sentences/* directory.
+
+For TACoS dataset, run *parse_tacos.py* to generate sentences text file and corresponding info file. The generated text file includes all sentences in the entire dataset, with each line a single sentence. The info file contains lists of sequence id and detail level for each sentence.
 
 ### Generating vectors from sentences
 

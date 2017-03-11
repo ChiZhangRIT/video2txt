@@ -1,0 +1,7 @@
+the person entered kitchen
+the person took a pack of beans from fridge
+the person washed the beans
+the person chopped the beans
+the person took a plate from the cupboard
+the person washed a plate
+the person moved the chopped beans from cutting board to the plate

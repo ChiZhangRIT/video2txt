@@ -1,0 +1,4 @@
+the person retrieved a loaf of bread
+the person placed the loaf on a cutting board
+the person sliced two slices of bread from the loaf
+the person returned the loaf to the cupboard
