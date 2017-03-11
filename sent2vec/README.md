@@ -1,6 +1,6 @@
-## Sentence-to-sentence Model
+## Sentence-to-vector Model
 
-This work is based on easy_seq2seq. Original code can be found here: https://github.com/suriyadeepan/easy_seq2seq
+This work is based on easy_seq2seq. Original code can be found [here](https://github.com/suriyadeepan/easy_seq2seq).
 
 ### Data preparation
 
