@@ -286,7 +286,7 @@ def scorer():
     model.batch_size = 1  # We decode one sentence at a time.
 
     # vectors = {}  # save vector to dict
-    vector = []  # save vector to list
+    vectors = []  # save vector to list
     id_counter = 0
     for sentence in sentences:
         # Get token-ids for the input sentence.
@@ -312,7 +312,7 @@ def scorer():
         # id_counter += 1
 
         # save vector to list
-        vector.append(np.squeeze(sent2vec))
+        vectors.append(np.squeeze(sent2vec))
 
     with open(gConfig['vector_file'], 'wb') as f:
         pkl.dump(vectors, f)
