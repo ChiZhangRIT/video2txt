@@ -1,9 +1,0 @@
-the person entered the room
-the person took a chopping board from a drawer
-the person took a knife from the same drawer
-the person went the fridge
-the person grabbed a cucumber
-the person took a plate from a cabinet
-the person washed the cucumber in the sink
-the person put the cucumber in a plate
-the person cut the cucumber using the knife
