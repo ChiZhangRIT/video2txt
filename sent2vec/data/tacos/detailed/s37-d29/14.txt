@@ -1,0 +1,6 @@
+person entered the room
+the person picked up cutting board and a knife
+the person selected herbs
+the person chopped the herbs into small pieces using knife
+the person poured the cut herb pieces into a plate
+the person cleaned knife

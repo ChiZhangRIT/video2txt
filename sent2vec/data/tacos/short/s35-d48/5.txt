@@ -1,0 +1,5 @@
+the person entered a kitchen
+the person obtained some peppers
+the person cut the peppers
+the person left the chopped peppers on a plate
+the person cleaned up

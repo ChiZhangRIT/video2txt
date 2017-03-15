@@ -1,0 +1,8 @@
+the person entered a kitchen
+the person grabbed a loaf of bread from a cupboard
+the person placed the loaf on the counter
+the person took out a plate from a drawer under the counter
+the person took out a knife from another drawer under the counter
+the person took the bread out of the bag
+the person cut off a slice of bread with the knife
+the person put the knife down

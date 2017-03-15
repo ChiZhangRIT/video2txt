@@ -1,0 +1,5 @@
+the person entered the kitchen
+the person took a chilli from the cabinet
+the person rinsed the chilli
+the person dried the chilli on a towel
+the person diced the chilli on a cutting board

@@ -1,0 +1,14 @@
+the person walked into the kitchen
+the person opened the fridge
+the person selected a cucumber
+the person closed the fridge
+the person set the cucumber on the counter top
+the person got a cutting board out of the cabinet
+the person got a knife out of the drawer
+the person set a knife on the cutting board
+the person rinsed the cucumber in the sink
+the person moved the knife off the cutting board
+the person selected a different knife from the drawer
+the person cut the cucumber into slices lengthwise
+the person cut the cucumber into slices crosswise
+the person set the knife down to the cutting board

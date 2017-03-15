@@ -1,0 +1,42 @@
+the person entered the kitchen
+the person retrieved a bag of uncooked pasta , a bottle of olive oil , salt , pepper and a cooking pot ,
+the person placed all of a bag of uncooked pasta , a bottle of olive oil , salt , pepper and a cooking pot on the counter
+the person filled the pot about one-fourth full of water at the sink ,
+the person placed the pot on the stove
+the person poured some olive oil into the pot ,
+the person turned on the stove
+the person stirred the pot with a claw-shaped utensil ,
+the person put some salt into to the pot waiting for the water to boil
+the water started to boil , the person poured about half of the bag of pasta into the pot ,
+the person added more salt and some pepper ,
+the person stirred the contents of the pot with the claw utensil
+the person retrieved another bottle from the cupboard
+the person poured some of the bottle contents into the pot ,
+the person stirred the pot
+the person used the claw utensil to lift some of the pasta in the pot out of the water ,
+the person used a fork to test the softness of the pasta
+the person removed a bit of liquid from the pot using a spoon ,
+the person tasted the liquid ,
+the person added more salt and pepper to the pot
+the person examined several bottles
+the person sniffed several bottles from the spice rack ,
+the person selected one ,
+the person added some of its contents to the pot ,
+the person stirred the pot
+the person placed the lid on the pot , which caused the water inside to boil more actively
+the person removed a colander from the drawer
+the person placed a colander in the sink
+the person removed the lid from the pot ,
+the person took out a piece of pasta using the claw utensil ,
+the person tasted the pasta ,
+the person added more salt to the pot ,
+the person stirred the pot
+the person pressed the claw utensil against some of the pasta ,
+the person replaced the lid on the pot
+the person removed the lid from the pot ,
+the person removed the pot from the stove ,
+the person poured the pot entire contents into the colander in the sink ,
+the person rinsed the cooked pasta under the faucet
+the person removed the colander from the sink ,
+tilted the colander over a large plate on the counter ,
+the person used a spoon to transfer the pasta from the colander to the plate

@@ -1,0 +1,13 @@
+the person entered a kitchen
+the person placed a small juicer on the counter
+the person retrieved a bag of oranges from a refrigerator
+the person chose one orange
+the person cut the orange in half using a small knife
+the person placed one half of the orange on the top of the juicer
+the person finished juicing the orange
+the person rotated the orange
+the person threw both halves away
+the person picked the pulp off the side of the juicer
+the person placed the pulp in the container
+the person chose a glass
+the person poured the juice into a glass

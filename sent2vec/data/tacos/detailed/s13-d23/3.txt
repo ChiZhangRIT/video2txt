@@ -1,0 +1,13 @@
+the person entered the kitchen
+the person placed a cutting board on the counter
+the person removed a knife from a drawer
+the person placed a knife on the cutting board
+the person removed a bowl from the cabinet
+the person placed a bowl on the counter
+the person grabbed two carrots from the refrigerator
+the person put two carrots on a plate
+the person removed a vegetable peeler from a drawer
+the person chopped the edges off the carrots
+the person peeled the carrots
+the person chopped the carrots into pieces
+the person moved the chopped carrots to the plate

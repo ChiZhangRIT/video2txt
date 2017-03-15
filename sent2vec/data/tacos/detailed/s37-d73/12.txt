@@ -1,0 +1,12 @@
+the person entered the kitchen
+the person got a kettle from under the counter
+the person filled a kettle with water
+the person plugged a kettle in
+the person got a tea pot from under the counter and some tea from the pantry
+the person got a tea strainer
+the person filled a tea strainer with tea
+the person put the tea strainer in the tea pot
+the person got a tea cup from the pantry
+the person poured the hot water into the tea pot
+the person unplugged the kettle
+the person poured the tea into the tea cup

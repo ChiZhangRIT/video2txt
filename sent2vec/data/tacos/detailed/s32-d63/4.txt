@@ -1,0 +1,22 @@
+the person walked into the kitchen
+the person got out a toaster
+the person went to the pantry
+the person got a loaf of bread
+the person went to the cupboard
+the person got a plate
+the person took two pieces of bread from the loaf
+the person put the loaf back in the pantry
+the person plugged the toaster in
+the person put the bread in the toaster
+the person turned the toaster on
+the person waited
+the person got a knife out of the drawer
+the person put a knife on the plate
+the person went to the fridge
+the person did not select an item
+they were finished
+the person put the bread on the plate
+the person unplugged the toaster
+the person moved the toaster aside
+the person washed the tongs in the sink
+the person put the tongs away

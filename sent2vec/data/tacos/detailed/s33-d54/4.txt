@@ -1,0 +1,9 @@
+the person opened a drawer
+the person removed a kitchen utensil from the drawer
+the person removed a mango from the fridge
+the person removed two plates from a cabinet
+the person removed a knife from the drawer
+the person used the knife to peel the mango
+the person sliced the mango
+the person put the mango on a dish
+the person washed everything he did n't need anymore

@@ -1,0 +1,28 @@
+the person entered a kitchen
+the person opened a drawer
+the person took out a cutting board
+the person placed the cutting board on the counter
+the person opened the fridge
+the person took out some herbs
+the person placed the herbs on the counter
+the person took some herbs out of the bag
+the person walked to the sink
+the person rinsed the herbs under the sink
+the person placed the herbs on the cutting board
+the person walked to the cupboard
+the person took a plate from the cupboard
+the person placed the plate on the counter
+the person opened the drawer
+the person took out a knife
+the person cut the herbs on the cutting board with the knife
+the person scrapped the herbs into the plate with the knife
+the person walked over to the other side of the counter ,
+the person took some herbs
+the person rinsed the herbs over the sink
+the person folded the herbs
+the person cut the herbs on the cutting board
+the person scrapped the herbs into the plate with the knife
+the person took the rubbish
+the person threw the scraps in the trash
+the person took the herbs that were in the bag
+the person placed the herbs in the fridge

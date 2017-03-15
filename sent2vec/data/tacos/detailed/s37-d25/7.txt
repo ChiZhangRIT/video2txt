@@ -1,0 +1,5 @@
+the person opened the fridge
+the person removed a loaf of bread from the fridge
+the person removed a cutting board from a drawer
+the person removed a knife from a drawer
+the person used the knife to thinly slice the bread

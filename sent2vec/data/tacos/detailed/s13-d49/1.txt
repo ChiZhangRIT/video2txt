@@ -1,0 +1,16 @@
+the person entered a kitchen
+the person turned on the stove
+the person removed a pot from a drawer
+the person placed water into a pot
+the person placed the pot onto the stove
+the person retrieved a bag of pasta , a bowl , and a strainer
+the person placed a bag of pasta , a bowl , and a strainer on the counter
+the person placed some pasta into the pot
+the person returned the bag of pasta to the cupboard
+the person stirred the pasta with a wooden spoon
+the person seasoned the pasta
+the person waited for the pasta to cook
+the person stirred the pasta occasionally
+the person poured the cooked pasta into the strainer
+the person rinsed the pasta in the strainer
+the person placed the pasta into a bowl

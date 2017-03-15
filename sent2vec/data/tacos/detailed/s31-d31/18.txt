@@ -1,0 +1,15 @@
+the person entered the kitchen
+the person took a piece of garlic from the pantry
+the person broke off two cloves
+the person peeled the cloves into the trash
+the person rinsed the cloves in the sink
+the person took a cutting board and a knife out of the drawer
+the person chopped the garlic on the cutting board
+the person removed a saucer from the cabinet
+the person placed the chopped garlic on a saucer
+the person rinsed the knife
+the person dried the knife
+the person put the knife back in the drawer
+the person rinsed the cutting board
+the person put the cutting board back in the drawer
+the person placed the saucer of garlic in the pantry

@@ -1,0 +1,15 @@
+the person entered the kitchen
+the person removed a stalk of broccoli from the fridge
+the person removed a cutting board and knife from the drawer
+the person removed a sauce pan and a skillet from the drawer
+the person cut up the broccoli
+the person placed the broccoli into the sauce pan of water
+the person removed oil from the cabinet
+the person poured oil into the skillet
+the person removed a drainer from the drawer
+the person drained the broccoli
+the person placed the broccoli into the skillet
+the person cooked the broccoli in the skillet
+the person seasoned the broccoli
+the person removed a plate from the cabinet
+the person placed the broccoli on the plate

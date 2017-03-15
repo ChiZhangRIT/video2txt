@@ -1,0 +1,7 @@
+the person entered a kitchen
+the person obtained a cutting board , knife , peeler , plate and a mango
+the person washed the plate and mango
+the person peeled the mango ,
+the person cut the mango into wedges around the core
+the person cut each wedge of the mango into small chunks ,
+the person placed the mango sliced into the bowl

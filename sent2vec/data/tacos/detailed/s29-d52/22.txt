@@ -1,0 +1,11 @@
+the person entered the kitchen
+the person went to the counter
+the person took out a cutting board and knife
+the person went to the refrigerator
+the person took out a kiwi
+the person cut the kiwi in half
+the person took out a peeler
+the person peeled half the kiwi
+the person sliced the peeled kiwi
+the person peeled the other kiwi half
+the person sliced the remaining kiwi

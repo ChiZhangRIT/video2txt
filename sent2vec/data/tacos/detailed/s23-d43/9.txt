@@ -1,0 +1,11 @@
+the person entered the kitchen
+the person took two potatoes from the pantry
+the person took two plates from the cabinet
+the person took a peeler from the drawer
+the person took a knife and cutting board from the drawer
+the person rinsed the potatoes
+the person scraped the peeler across the potato
+the person removed the skin from the potato
+the person cut the potato in half lengthwise
+the person sliced each half of the potato
+the person put the slices on a plate

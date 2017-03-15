@@ -1,0 +1,7 @@
+the person entered a kitchen
+the person retrieved garlic from a cabinet
+the person removed a cutting board and knife from a drawer
+the person used a cutting board and knife to remove the skins from the garlic
+the person threw the skins into the trash
+the person removed a garlic press from the same drawer
+the person used a garlic press to crush two cloves of garlic

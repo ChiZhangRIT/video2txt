@@ -1,0 +1,15 @@
+the person entered into the kitchen room
+the person opened the refrigerator
+the person took a cauliflower
+the person removed the outer leaves of cauliflower
+the person transferred the outer leaved to dustbin
+the person opened the drawer
+the person took a cutting board and knife
+the person took a bowl
+the person placed the cauliflower on the cutting board
+the person cut the cauliflower into pieces
+the person transferred the pieces to a bowl
+the person washed the knife
+the person wiped the knife with a cloth
+the person kept the knife back to the drawer
+the person cleaned the cutting board

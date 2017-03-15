@@ -1,0 +1,27 @@
+the person placed a toaster on the counter
+the person got a wrapped loaf of bread from the cabinet
+the person sat a wrapped loaf of bread on the counter
+the person got a plate from another cabinet ,
+also placed a plate on the counter
+the person opened the bread
+the person pulled out two slices
+the person placed the bread on the plate
+the person closed the bread
+the person returned the bread to the cabinet
+the person pulled an electrical plug up from the counter
+the person plugged in the toaster
+the person placed the two pieces of bread in the toaster
+the person pressed down the lever
+the person waited for the toast ,
+the person dumped bread crumbs off the plate into the sink
+the person also opened the drawer
+the person pulled out a butter knife
+the person went to the refrigerator
+the person looked for something ,
+the person returned to the counter with nothing
+the person pulled tongs out of the drawer
+the person used the tongs to place the toast on the plate
+the person unplugged the toaster
+the person placed the butter knife back in the drawer
+the person rinsed the tongs off in the sink
+the person put the tongs back in the drawer

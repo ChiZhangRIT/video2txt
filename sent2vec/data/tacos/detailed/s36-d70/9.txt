@@ -1,0 +1,38 @@
+the person entered the kitchen ,
+the person removed a juicer from a drawer ,
+the person placed a juicer on the counter
+the person removed an orange from the refrigerator ,
+the person removed a small wooden cutting board from a drawer ,
+the person placed a drawer on the counter beside the juicer ,
+the person removed a knife from another drawer ,
+the person placed the orange on the cutting board ,
+the person cut the orange in half
+the person removed the lid of the juicer ,
+the person shook the reservoir upside down over the sink ,
+the person replaced the lid
+the person juiced one half of the orange ,
+the person rotated one half of the orange on the juicer
+the person placed one half of the orange on the cutting board
+the person juiced the other half ,
+the person rotated the other half on the juicer
+before squeezing the other half once between his thumb and first three fingers
+the person placed the other half on the cutting board
+the person removed a drinking glass from the cabinet ,
+the person placed a drinking glass on the counter beside the juicer ,
+the person threw the orange halves in the trash ,
+the person rinsed his hands under the faucet ,
+the person rinsed the glass
+the person placed the glass back on the counter
+the person removed the lid from the juicer ,
+the person kept the lid over the reservoir ,
+the person pressed the remaining liquid out of the pulp by hand
+the person placed the lid on the cutting board ,
+the person poured the juice from the reservoir into the glass ,
+the person placed the reservoir on the counter ,
+the person emptied the contents of the juicer lid into the trash ,
+the person rinsed the lid and the reservoir under the faucet ,
+the person replaced the lid
+the person put the lid and the reservoir both away
+the person rinsed the cutting board and the knife under the faucet ,
+the person put the cutting board and the knife away
+the person began to walk out of the kitchen

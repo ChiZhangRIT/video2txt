@@ -1,0 +1,26 @@
+the person entered the kitchen
+the person removed a cutting board from the kitchen drawer
+the person placed a cutting board on the counter
+the person removed a knife from another kitchen drawer
+the person placed a knife on the counter
+the person turned towards the cabinet/pantry
+the person removed some ginger
+the person placed some ginger on cutting board
+the person returned to an adjacent cabinet
+the person removed a plate
+the person vigorously rinsed the plate in the kitchen sink
+the person placed the plate to the cutting board on the counter
+the person cut the ginger root in half
+the person placed one half back in the cabinet/pantry
+the person took the remaining half
+the person rinsed the remaining half vigorously in the kitchen sink
+the person cut the ends off of the ginger with the knife
+the person cut the ginger in half
+the person took one half of the ginger
+the person sliced one half of the ginger
+the person took the other half of the ginger
+the person sliced the other half of the ginger
+the person sliced the already sliced ginger again
+the person placed the finished slices on the plate
+the person left the knife on the cutting board
+the person placed the ends in the trash

@@ -1,0 +1,5 @@
+the person entered the kitchen
+the person prepared a stalk of broccoli
+the person cooked the broccoli
+the person seasoned the broccoli
+the person placed the broccoli on a plate

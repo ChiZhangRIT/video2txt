@@ -1,0 +1,8 @@
+the person entered a kitchen
+the person took two potatoes from the shelf
+the person placed the potatoes on the cutting wood
+the person took two plates from the shelf again
+the person took knife and slicer from the cupboard
+the person sliced the potatoes using the slicer
+the person cut the potatoes using the knife
+the person placed the cut potatoes on the plate

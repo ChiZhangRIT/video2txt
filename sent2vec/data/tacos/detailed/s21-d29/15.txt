@@ -1,0 +1,12 @@
+the person opened a kitchen drawer
+the person rummaged through
+the person selected a paring knife
+the person placed a paring knife on the counter
+the person fetched a round chopping board from a cabinet
+the person placed a round chopping board on the sink
+the person moved towards a potted kitchen plant
+the person grabbed a handful of herbs
+the person washed the herbs
+the person placed the herbs on the chopping board
+the person used the paring knife , he chopped up the herbs
+the person placed the rest of the potted plant into the refrigerator
