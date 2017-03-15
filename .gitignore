@@ -1,13 +1,15 @@
-sent2sent/data/
-sent2sent/model/
-sent2sent/log_dir/
 *.pyc
 *.pkl
 *.npy
+
+sent2sent/data/
+sent2sent/model/
+sent2sent/log_dir/
 !sent2sent/data/_toy_Dec.txt
 !sent2sent/data/_toy_Enc.txt
 
-!sent2vec/sentences/
 sent2vec/model/
-!sent2vec/vectors/
-
+sent2vec/sentences/
+sent2vec/vectors/
+!sent2vec/sentences/sample.txt
+!sent2vec/vectors/sample.pkl
