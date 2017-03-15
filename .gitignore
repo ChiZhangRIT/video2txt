@@ -10,4 +10,4 @@ sent2sent/log_dir/
 
 sent2vec/model/
 !sent2vec/sentences/*
-sent2vec/vectors/*
+sent2vec/vectors/
