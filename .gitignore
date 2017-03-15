@@ -9,5 +9,5 @@ sent2sent/log_dir/
 !sent2sent/data/_toy_Enc.txt
 
 sent2vec/model/
-!sent2vec/sentences/*
+sent2vec/sentences/
 sent2vec/vectors/
