@@ -10,7 +10,13 @@ mkdir model
 ```
 Put the model and sentences data in *model/* and *sentences/* directory.
 
-For TACoS dataset, run *parse_tacos.py* to generate sentences text file and corresponding info file. The generated text file includes all sentences in the entire dataset, with each line a single sentence. The info file contains lists of sequence id and detail level for each sentence. Please look at [here](https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/research/vision-and-language/tacos-multi-level-corpus/) for more details about TACoS.
+#### TACoS dataset
+
+*parse_tacos.py* -- Generate sentences text file and corresponding info file. The generated text file includes all sentences in the entire dataset, with each line a single sentence. 
+
+*tacos_split.py* -- Split the sentences and vectors into training and testing set, and save them in the same directory.
+
+The info file contains lists of sequence id and detail level for each sentence. Please look at [here](https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/research/vision-and-language/tacos-multi-level-corpus/) for more details about TACoS.
 
 
 ### Generating vectors from sentences

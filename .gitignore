@@ -14,3 +14,6 @@ sent2vec/vectors/
 !sent2vec/sentences/sample.txt
 !sent2vec/vectors/sample.pkl
 
+summarizer/data/
+summarizer/model/
+summarizer/log_dir/
