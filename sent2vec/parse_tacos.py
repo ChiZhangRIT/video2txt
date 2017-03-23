@@ -35,8 +35,13 @@ for detail_level in detail_levels:
                     with open(root+'/'+file, 'r') as input_txt:
                         sentences_orig = input_txt.readlines()
                     # add "." at the end of sentences
-                    sentences = [i.split('\n')[0]+' .\n'
-                                 for i in sentences_orig]
+                    # sentences = [i.split('\n')[0]+' .\n' for i in sentences_orig]
+                    sentences = []
+                    for i in sentences_orig:
+                        if i.split('\n')[0][-1] == ',':
+                            sentences.append(i)
+                        else:
+                            sentences.append(i.split('\n')[0]+' .\n')
 
                     # document detail_level and sequence_id
                     num_sentences = len(sentences)
