@@ -13,8 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
-"""This is a copy of original file."""
-
 """Library for creating sequence-to-sequence models in TensorFlow.
 
 Sequence-to-sequence recurrent neural networks can learn complex functions
@@ -1126,7 +1124,7 @@ def model_with_buckets(encoder_inputs, decoder_inputs, targets, weights,
           losses.append(sequence_loss_by_example(
               outputs[-1], targets[:bucket[1]], weights[:bucket[1]],
               softmax_loss_function=softmax_loss_function))
-        else:
+        else: # True bu default
           losses.append(sequence_loss(
               outputs[-1], targets[:bucket[1]], weights[:bucket[1]],
               softmax_loss_function=softmax_loss_function))

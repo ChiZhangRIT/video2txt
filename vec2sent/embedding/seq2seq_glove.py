@@ -70,6 +70,7 @@ def _extract_argmax_and_embed(embedding, output_projection=None,
     prev_symbol = math_ops.argmax(prev, 1)
     # Note that gradients will not propagate through the second parameter of
     # embedding_lookup.
+
     emb_prev = embedding_ops.embedding_lookup(embedding, prev_symbol)
     if not update_embedding:
       emb_prev = array_ops.stop_gradient(emb_prev)
@@ -218,6 +219,7 @@ def attention_decoder(decoder_inputs,
       input_size = inp.get_shape().with_rank(2)[1]
       if input_size.value is None:
         raise ValueError("Could not infer input size from input: %s" % inp.name)
+    
       x = linear([inp] + attns, input_size, True)
       # Run the RNN.
       cell_output, state = cell(x, state)
@@ -242,7 +244,7 @@ def embedding_attention_decoder(decoder_inputs,
                                 attention_states,
                                 cell,
                                 num_symbols,
-                                embedding_size,
+                                # embedding_size,
                                 num_heads=1,
                                 output_size=None,
                                 output_projection=None,
@@ -296,23 +298,32 @@ def embedding_attention_decoder(decoder_inputs,
     ValueError: When output_projection has the wrong shape.
   """
   if output_size is None:
-    output_size = cell.output_size
+      output_size = cell.output_size
   if output_projection is not None:
-    proj_biases = ops.convert_to_tensor(output_projection[1], dtype=dtype)
-    proj_biases.get_shape().assert_is_compatible_with([num_symbols])
+      proj_biases = ops.convert_to_tensor(output_projection[1], dtype=dtype)
+      proj_biases.get_shape().assert_is_compatible_with([num_symbols])
 
-  with variable_scope.variable_scope(
-      scope or "embedding_attention_decoder", dtype=dtype) as scope:
-
-    embedding = variable_scope.get_variable("embedding",
-                                            [num_symbols, embedding_size])
-    loop_function = _extract_argmax_and_embed(
+  # with variable_scope.variable_scope(
+  #     scope or "embedding_attention_decoder", dtype=dtype) as scope:
+  #
+  #   embedding = variable_scope.get_variable("embedding",
+  #                                           [num_symbols, embedding_size])
+  loop_function = _extract_argmax_and_embed(
         embedding, output_projection,
         update_embedding_for_previous) if feed_previous else None
-    emb_inp = [
-        embedding_ops.embedding_lookup(embedding, i) for i in decoder_inputs]
-    return attention_decoder(
-        emb_inp,
+  #   emb_inp = [
+  #       embedding_ops.embedding_lookup(embedding, i) for i in decoder_inputs]
+  #   return attention_decoder(
+  #       emb_inp,
+  #       initial_state,
+  #       attention_states,
+  #       cell,
+  #       output_size=output_size,
+  #       num_heads=num_heads,
+  #       loop_function=loop_function,
+  #       initial_state_attention=initial_state_attention)
+  return attention_decoder(
+        decoder_inputs,
         initial_state,
         attention_states,
         cell,
@@ -324,16 +335,15 @@ def embedding_attention_decoder(decoder_inputs,
 def embedding_attention_seq2seq(encoder_inputs,
                                 decoder_inputs,
                                 cell,
-                                num_encoder_symbols,
+                                # num_encoder_symbols,
                                 num_decoder_symbols,
-                                embedding_size,
+                                # embedding_size,
                                 num_heads=1,
                                 output_projection=None,
                                 feed_previous=False,
                                 dtype=None,
                                 scope=None,
-                                initial_state_attention=False,
-                                pretrained_embedding_path=None):
+                                initial_state_attention=False):
   """Embedding sequence-to-sequence model with attention.
 
   This model first embeds encoder_inputs by a newly created embedding (of shape
@@ -382,10 +392,12 @@ def embedding_attention_seq2seq(encoder_inputs,
       scope or "embedding_attention_seq2seq", dtype=dtype) as scope:
     dtype = scope.dtype
     # Encoder.
-    init = tf.constant(np.load(pretrained_embedding_path))
-    encoder_cell = rnn_cell.EmbeddingWrapper(
-        cell, embedding_classes=num_encoder_symbols,
-        embedding_size=embedding_size, initializer=init)
+    # init = tf.constant(np.load(pretrained_embedding_path))
+    # encoder_cell = rnn_cell.EmbeddingWrapper(
+    #     cell, embedding_classes=num_encoder_symbols,
+    #     embedding_size=embedding_size, initializer=init)
+    encoder_cell = cell
+
     encoder_outputs, encoder_state = rnn.rnn(
         encoder_cell, encoder_inputs, dtype=dtype)
 
@@ -401,13 +413,14 @@ def embedding_attention_seq2seq(encoder_inputs,
       output_size = num_decoder_symbols
 
     if isinstance(feed_previous, bool):
+
       return embedding_attention_decoder(
           decoder_inputs,
           encoder_state,
           attention_states,
           cell,
           num_decoder_symbols,
-          embedding_size,
+        #   embedding_size,
           num_heads=num_heads,
           output_size=output_size,
           output_projection=output_projection,
