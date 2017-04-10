@@ -52,7 +52,8 @@ def basic_tokenizer(sentence):
         try:
           word = str.encode(space_separated_fragment)
         except:
-          pdb.set_trace()
+          word = ''
+        #   pdb.set_trace()
     else:
         word = space_separated_fragment
     words.extend(re.split(_WORD_SPLIT, word))

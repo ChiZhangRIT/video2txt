@@ -112,7 +112,7 @@ class Seq2SeqModel(object):
             encoder_inputs, decoder_inputs, cell,
             # num_encoder_symbols=source_vocab_size,
             num_decoder_symbols=target_vocab_size,
-            # embedding_size=size,
+            embedding_size=size,
             output_projection=output_projection,
             feed_previous=do_decode)
 
@@ -122,10 +122,10 @@ class Seq2SeqModel(object):
     self.decoder_inputs = []
     self.target_weights = []
     for i in xrange(buckets[-1][0]):  # Last bucket is the biggest one.
-        self.encoder_inputs.append(tf.placeholder(tf.float32, shape=[None,300],
+        self.encoder_inputs.append(tf.placeholder(tf.float32, shape=[None,self.layer_size],
                                                   name="encoder{0}".format(i)))
     for i in xrange(buckets[-1][1] + 1):
-        self.decoder_inputs.append(tf.placeholder(tf.float32, shape=[None,1],
+        self.decoder_inputs.append(tf.placeholder(tf.int32, shape=[None],
                                                   name="decoder{0}".format(i)))
         self.target_weights.append(tf.placeholder(tf.float32, shape=[None],
                                                   name="weight{0}".format(i)))
@@ -135,17 +135,18 @@ class Seq2SeqModel(object):
 
     # Training outputs and losses.
     if forward_only:
-      self.outputs, self.losses = tf.nn.seq2seq.model_with_buckets(
-          self.encoder_inputs, self.decoder_inputs, targets,
-          self.target_weights, buckets, lambda x, y: seq2seq_f(x, y, True),
-          softmax_loss_function=softmax_loss_function)
-      # If we use output projection, we need to project outputs for decoding.
-      if output_projection is not None:
-        for b in xrange(len(buckets)):
-          self.outputs[b] = [
-              tf.matmul(output, output_projection[0]) + output_projection[1]
-              for output in self.outputs[b]
-          ]
+        self.outputs, self.losses = s2s.model_with_buckets(
+            self.encoder_inputs, self.decoder_inputs, targets,
+            self.target_weights, buckets,
+            lambda x, y: seq2seq_f(x, y, True),
+            softmax_loss_function=softmax_loss_function)
+        # If we use output projection, we need to project outputs for decoding.
+        if output_projection is not None:
+            for b in xrange(len(buckets)):
+                self.outputs[b] = [
+                    tf.matmul(output, output_projection[0]) + output_projection[1]
+                    for output in self.outputs[b]
+                ]
     else:
         # sent2sent
         self.outputs, self.losses = s2s.model_with_buckets(
@@ -214,17 +215,18 @@ class Seq2SeqModel(object):
 
     # Since our targets are decoder inputs shifted by one, we need one more.
     last_target = self.decoder_inputs[decoder_size].name
-    input_feed[last_target] = np.expand_dims(np.zeros([self.batch_size], dtype=np.int32), axis=1)
+    input_feed[last_target] = np.zeros([self.batch_size], dtype=np.int32)
+    # input_feed[last_target] = np.expand_dims(np.zeros([self.batch_size], dtype=np.int32), axis=1)
 
     # Output feed: depends on whether we do a backward step or not.
     if not forward_only:
-      output_feed = [self.updates[bucket_id],  # Update Op that does SGD.
-                     self.gradient_norms[bucket_id],  # Gradient norm.
-                     self.losses[bucket_id]]  # Loss for this batch.
+        output_feed = [self.updates[bucket_id],  # Update Op that does SGD.
+                       self.gradient_norms[bucket_id],  # Gradient norm.
+                       self.losses[bucket_id]]  # Loss for this batch.
     else:
-      output_feed = [self.losses[bucket_id]]  # Loss for this batch.
-      for l in xrange(decoder_size):  # Output logits.
-        output_feed.append(self.outputs[bucket_id][l])
+        output_feed = [self.losses[bucket_id]]  # Loss for this batch.
+        for l in xrange(decoder_size):  # Output logits.
+            output_feed.append(self.outputs[bucket_id][l])
 
     merged_summary_op = tf.summary.merge_all()
     outputs = session.run(output_feed, input_feed)
@@ -235,7 +237,7 @@ class Seq2SeqModel(object):
       return None, outputs[0], outputs[1:]  # No gradient norm, loss, outputs.
 
 
-  def get_batch(self, data, bucket_id):
+  def get_batch(self, data, bucket_id, train=True):
     """Get a random batch of data from the specified bucket, prepare for step.
 
     To feed data in step(..) it must be a list of batch-major vectors, while
@@ -244,8 +246,10 @@ class Seq2SeqModel(object):
 
     Args:
       data: a tuple/list of size len(self.buckets) in which each element contains
-        lists of pairs of input and output data that we use to create a batch.
+          lists of pairs of input and output data that we use to create a batch.
       bucket_id: integer, which bucket to get the batch for.
+      Train: bool. If true, randomly select samples (allow duplication); If False,
+          in ecal mode, no duplication allowed in random selection.
 
     Returns:
       The triple (encoder_inputs, decoder_inputs, target_weights) for
@@ -266,7 +270,10 @@ class Seq2SeqModel(object):
     # Get a random batch of encoder and decoder inputs from data,
     # pad them if needed, reverse encoder inputs and add GO to decoder.
     for _ in xrange(self.batch_size):
-        encoder_input, decoder_input = random.choice(data[bucket_id])
+        if train == True:
+            encoder_input, decoder_input = random.choice(data[bucket_id])
+        else:  # train = False, in eval mode.
+            encoder_input, decoder_input = data
 
         # Encoder inputs are padded and then reversed.
         PAD_VEC = [0] * self.layer_size  # convert data_utils.PAD_ID to 300-d vector
@@ -289,9 +296,9 @@ class Seq2SeqModel(object):
 
     # Batch decoder inputs are re-indexed decoder_inputs, we create weights.
     for length_idx in xrange(decoder_size):
-        batch_decoder_inputs.append(np.expand_dims(
+        batch_decoder_inputs.append(#np.expand_dims(
             np.array([decoder_inputs[batch_idx][length_idx]
-                      for batch_idx in xrange(self.batch_size)], dtype=np.float32), axis=1))
+                      for batch_idx in xrange(self.batch_size)], dtype=np.int32))#, axis=1))
 
         # Create target_weights to be 0 for targets that are padding.
         batch_weight = np.ones(self.batch_size, dtype=np.float32)

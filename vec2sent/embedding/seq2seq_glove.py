@@ -219,7 +219,7 @@ def attention_decoder(decoder_inputs,
       input_size = inp.get_shape().with_rank(2)[1]
       if input_size.value is None:
         raise ValueError("Could not infer input size from input: %s" % inp.name)
-    
+
       x = linear([inp] + attns, input_size, True)
       # Run the RNN.
       cell_output, state = cell(x, state)
@@ -244,7 +244,7 @@ def embedding_attention_decoder(decoder_inputs,
                                 attention_states,
                                 cell,
                                 num_symbols,
-                                # embedding_size,
+                                embedding_size,
                                 num_heads=1,
                                 output_size=None,
                                 output_projection=None,
@@ -303,27 +303,19 @@ def embedding_attention_decoder(decoder_inputs,
       proj_biases = ops.convert_to_tensor(output_projection[1], dtype=dtype)
       proj_biases.get_shape().assert_is_compatible_with([num_symbols])
 
-  # with variable_scope.variable_scope(
-  #     scope or "embedding_attention_decoder", dtype=dtype) as scope:
-  #
-  #   embedding = variable_scope.get_variable("embedding",
-  #                                           [num_symbols, embedding_size])
-  loop_function = _extract_argmax_and_embed(
-        embedding, output_projection,
-        update_embedding_for_previous) if feed_previous else None
-  #   emb_inp = [
-  #       embedding_ops.embedding_lookup(embedding, i) for i in decoder_inputs]
-  #   return attention_decoder(
-  #       emb_inp,
-  #       initial_state,
-  #       attention_states,
-  #       cell,
-  #       output_size=output_size,
-  #       num_heads=num_heads,
-  #       loop_function=loop_function,
-  #       initial_state_attention=initial_state_attention)
-  return attention_decoder(
-        decoder_inputs,
+  with variable_scope.variable_scope(
+      scope or "embedding_attention_decoder", dtype=dtype) as scope:
+
+      embedding = variable_scope.get_variable("embedding",
+                                            [num_symbols, embedding_size])
+      loop_function = _extract_argmax_and_embed(
+          embedding, output_projection,
+          update_embedding_for_previous) if feed_previous else None
+      emb_inp = [
+          embedding_ops.embedding_lookup(embedding, i) for i in decoder_inputs]
+
+      return attention_decoder(
+        emb_inp,
         initial_state,
         attention_states,
         cell,
@@ -332,12 +324,13 @@ def embedding_attention_decoder(decoder_inputs,
         loop_function=loop_function,
         initial_state_attention=initial_state_attention)
 
+
 def embedding_attention_seq2seq(encoder_inputs,
                                 decoder_inputs,
                                 cell,
                                 # num_encoder_symbols,
                                 num_decoder_symbols,
-                                # embedding_size,
+                                embedding_size,
                                 num_heads=1,
                                 output_projection=None,
                                 feed_previous=False,
@@ -411,7 +404,6 @@ def embedding_attention_seq2seq(encoder_inputs,
     if output_projection is None:
       cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
       output_size = num_decoder_symbols
-
     if isinstance(feed_previous, bool):
 
       return embedding_attention_decoder(
@@ -420,7 +412,7 @@ def embedding_attention_seq2seq(encoder_inputs,
           attention_states,
           cell,
           num_decoder_symbols,
-        #   embedding_size,
+          embedding_size,
           num_heads=num_heads,
           output_size=output_size,
           output_projection=output_projection,

@@ -30,6 +30,7 @@ import tensorflow as tf
 from pycocoevalcap.eval import COCOScorer
 import pickle as pkl
 import json
+import copy
 
 import data_utils
 import seq2seq_model
@@ -55,7 +56,7 @@ def get_config(config_file='seq2seq.ini'):
 
 # We use a number of buckets and pad to the closest one for efficiency.
 # See seq2seq_model.Seq2SeqModel for details of how they work.
-_buckets = [(5, 15), (10, 20), (15, 30), (15, 50)]
+_buckets = [(10, 15), (10, 20), (15, 30), (15, 50)]
 
 
 def read_data(source_path, target_path, max_size=None):
@@ -119,6 +120,7 @@ def process_data(source_vectors, source_info, target_info):
     assert (len(target_seq_id_list) == len(target_ins_id_list)),"invalid train_dec_info_file file."
 
     source = []
+    info = []  # a list of list [seq_id, ins_id]
     prev_seq_id, prev_ins_id = None, None
     for i in xrange(len(target_seq_id_list)):
         current_seq_id = target_seq_id_list[i]
@@ -131,11 +133,12 @@ def process_data(source_vectors, source_info, target_info):
             ind.sort()
             current_video_vectors = [source_vectors[k] for k in ind]
             source.append(current_video_vectors)
+            info.append([current_seq_id, current_ins_id])
 
         prev_seq_id = current_seq_id
         prev_ins_id = current_ins_id
 
-    return source
+    return source, info
 
 
 def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_size=None):
@@ -156,26 +159,26 @@ def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_siz
     data_set: a list of length len(_buckets); data_set[n] contains a list of
         (source, target) pairs read from the provided data files that fit
         into the n-th bucket, i.e., such that len(source) < _buckets[n][0] and
-        len(target) < _buckets[n][1]; source and target are lists of token-ids.
+        len(target) < _buckets[n][1]; source and target are lists of vec/token-ids.
     """
     data_set = [[] for _ in _buckets]
+    data_info = [[] for _ in _buckets]
     with open(vec_enc, 'r') as source_file:
         source_vectors = pkl.load(source_file)
     with open(source_info_file, 'r') as source_information_file:
         source_info = json.load(source_information_file)
     with open(target_info_file, 'r') as target_information_file:
         target_info = json.load(target_information_file)
-    source = process_data(source_vectors, source_info, target_info)
+    source, info = process_data(source_vectors, source_info, target_info)
         # Note: for TACoS short-singlesentence task, len(source) = 2862 which is the number of videos; len(source[i]) is the number of sentences in description i; len(source[i][j]) is 300 which is the dimension of sentence vectors.))
 
     with tf.gfile.GFile(sent_dec, mode="r") as target_file:
-        # source, target = source_file.readline(), target_file.readline()
         target = target_file.readline()
         counter = 0
-        # "source[counter]" corresponds to "target".
-        current_source = source[counter]
+
         while counter < len(source) and target and (not max_size or counter < max_size):
-            counter += 1
+            # "source[counter]" corresponds to "target".
+            current_source = source[counter]
             if counter % 100000 == 0:
                 print("  reading data line %d" % counter)
                 sys.stdout.flush()
@@ -184,9 +187,25 @@ def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_siz
             for bucket_id, (source_size, target_size) in enumerate(_buckets):
                 if len(current_source) < source_size and len(target_ids) < target_size:
                     data_set[bucket_id].append([current_source, target_ids])
+                    data_info[bucket_id].append(info[counter])
                     break
+            counter += 1
             target = target_file.readline()
-    return data_set
+
+    # Some text file in tacos dateset is empty.
+    # We remove the enc-dec pairs with empty entries.
+    data_set_copy = copy.deepcopy(data_set)
+    data_info_copy = copy.deepcopy(data_info)
+    for bucket_id in range(len(data_set_copy)):
+        for pair in range(len(data_set_copy[bucket_id])):
+            enc = data_set_copy[bucket_id][pair][0]
+            dec = data_set_copy[bucket_id][pair][1]
+            if len(enc) == 0 or len(dec) == 0:
+                data_set[bucket_id].remove(data_set_copy[bucket_id][pair])
+                data_info[bucket_id].remove(data_info_copy[bucket_id][pair])
+    del data_set_copy, data_info_copy
+
+    return data_set, data_info
 
 
 def create_model(session, forward_only):
@@ -200,11 +219,12 @@ def create_model(session, forward_only):
 
   ckpt = tf.train.get_checkpoint_state(gConfig['model_directory'])
   if ckpt and ckpt.model_checkpoint_path:
-    print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-    model.saver.restore(session, ckpt.model_checkpoint_path)
+      print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+    #   model.saver.restore(session, ckpt.model_checkpoint_path)
+      model.saver.restore(session, "model/test/seq2seq.ckpt-171500")
   else:
-    print("Created model with fresh parameters.")
-    session.run(tf.global_variables_initializer())
+      print("Created model with fresh parameters.")
+      session.run(tf.global_variables_initializer())
   return model
 
 
@@ -215,7 +235,6 @@ def train():
                           working_directory=gConfig['working_directory'],
                           train_dec=gConfig['train_sent_dec'],
                           dec_vocabulary_size=gConfig['dec_vocab_size'])
-
   # setup config to use BFC allocator
   config = tf.ConfigProto()
   config.gpu_options.allocator_type = 'BFC'
@@ -228,7 +247,7 @@ def train():
     # Read data into buckets and compute their sizes.
     print ("Reading training data (limit: %d)."
            % gConfig['max_train_data_size'])
-    train_set = read_vec_sent(vec_enc=gConfig['train_vec_enc'],
+    train_set, _ = read_vec_sent(vec_enc=gConfig['train_vec_enc'],
                               source_info_file=gConfig['train_enc_info_file'],
                               sent_dec=sent_dec_train,
                               target_info_file=gConfig['train_dec_info_file'],
@@ -300,159 +319,71 @@ def train():
         sys.stdout.flush()
 
 
-def decode():
-  with tf.Session() as sess:
-    # Create model and load parameters.
-    model = create_model(sess, True)
-    model.batch_size = 1  # We decode one sentence at a time.
-
-    # Load vocabularies.
-    enc_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.enc" % gConfig['enc_vocab_size'])
-    dec_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.dec" % gConfig['dec_vocab_size'])
-
-    enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
-    _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
-
-    # Decode from standard input.
-    sys.stdout.write("> ")
-    sys.stdout.flush()
-    sentence = sys.stdin.readline()
-    while sentence:
-      # Get token-ids for the input sentence.
-      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
-      # Which bucket does it belong to?
-      bucket_id = min([b for b in xrange(len(_buckets))
-                       if _buckets[b][0] > len(token_ids)])
-      # Get a 1-element batch to feed the sentence to the model.
-      encoder_inputs, decoder_inputs, target_weights = model.get_batch(
-          {bucket_id: [(token_ids, [])]}, bucket_id)
-      # Get output logits for the sentence.
-      _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
-                                       target_weights, bucket_id, True)
-      # This is a greedy decoder - outputs are just argmaxes of output_logits.
-      outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
-      # If there is an EOS symbol in outputs, cut them at that point.
-      if data_utils.EOS_ID in outputs:
-        outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-      # Print out French sentence corresponding to outputs.
-      print(" ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in outputs]))
-      print("> ", end="")
-      sys.stdout.flush()
-      sentence = sys.stdin.readline()
-
-
 def scorer():
   with tf.Session() as sess:
     # Create model and load parameters.
     model = create_model(sess, True)
 
     # Load vocabularies.
-    enc_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.enc" % gConfig['enc_vocab_size'])
+    # enc_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.enc" % gConfig['enc_vocab_size'])
     dec_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.dec" % gConfig['dec_vocab_size'])
 
-    enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
     _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
 
-    test_file = os.path.join(gConfig['encoder_test_file'])
-    test_captions = open(test_file,'r').readlines()
+    _, sent_dec_test = data_utils.prepare_custom_data(
+                            working_directory=gConfig['working_directory'],
+                            train_dec=gConfig['test_sent_dec'],
+                            dec_vocabulary_size=gConfig['dec_vocab_size'])
 
+    test_set, test_info = read_vec_sent(vec_enc=gConfig['test_vec_enc'],
+                              source_info_file=gConfig['test_enc_info_file'],
+                              sent_dec=sent_dec_test,
+                              target_info_file=gConfig['test_dec_info_file'],
+                              max_size=gConfig['max_train_data_size'])
     model.batch_size = 1  # We decode one sentence at a time.
-    output_captions = []
-    for sentence in test_captions:
-      # Get token-ids for the input sentence.
-      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
-      # Which bucket does it belong to?
-      token_ids = token_ids[:40]
-      try:
-        bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
-      except:
-        # if sentence length greater than 50
-        pdb.set_trace()
-      # Get a 1-element batch to feed the sentence to the model.
-      encoder_inputs, decoder_inputs, target_weights = model.get_batch(
-          {bucket_id: [(token_ids, [])]}, bucket_id)
-      # Get output logits for the sentence.
-      _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
-                                       target_weights, bucket_id, True)
-      # This is a greedy decoder - outputs are just argmaxes of output_logits.
-      outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
-      # If there is an EOS symbol in outputs, cut them at that point.
-      if data_utils.EOS_ID in outputs:
-        outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-      # Print out French sentence corresponding to outputs.
-      output_caption = " ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in outputs])
-      output_captions.append(output_caption)
-    # pdb.set_trace()
-    gt_info = pkl.load(open(test_file[:-4]+'.pkl','r'))
+    output_captions = []  # output sentences
+    gt_captions = []  # ground truth sentences
+    output_info = []  # seq_id and ins_id
+    for bucket_id in xrange(len(test_set)):
+        for sample_id in xrange(len(test_set[bucket_id])):
+            data_pair = test_set[bucket_id][sample_id]
+            data_info = test_info[bucket_id][sample_id]
+            # Get a 1-element batch to feed the sentence to the model.
+            encoder_inputs, decoder_inputs, target_weights = model.get_batch(
+                data_pair, bucket_id, train=False)
+            # Get output logits for the sentence.
+            _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
+                                         target_weights, bucket_id, True)
+            # This is a greedy decoder - outputs are just argmaxes of output_logits.
+            outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
+            # If there is an EOS symbol in outputs, cut them at that point.
+            if data_utils.EOS_ID in outputs:
+                outputs = outputs[:outputs.index(data_utils.EOS_ID)]
+            # Print out sentence corresponding to outputs.
+            output_caption = " ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in outputs])
+            output_captions.append(output_caption)
 
-    id_list = gt_info['ids']
-    gt_dict = gt_info['gt']
+            gt_caption = " ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in data_pair[1]])
+            gt_captions.append(gt_caption)
+
+            output_info.append(data_info)
+
+    with open(gConfig['result_dir'] + 'output.txt', 'w') as f:
+        for item in output_captions:
+            f.write("%s\n" % item)
+    with open(gConfig['result_dir'] + 'groundtruth.txt', 'w') as f:
+        for item in gt_captions:
+            f.write("%s\n" % item.replace(' _EOS',''))
+    with open(gConfig['result_dir'] + 'output_info.txt', 'w') as f:
+        for item in output_info:
+            f.write("%s, %s\n" % (item[0], item[1]))
+
+    # calculate metrics
     pred_dict = {idx: [{'image_id':idx,'caption':sent}] for idx, sent in enumerate(output_captions)}
-    with open(gConfig['model_directory']+gConfig['encoder_test_file'].split('/')[-1][:-4]+'_output.txt','w') as f:
-        [f.write(i+'\n') for i in output_captions]
+    gt_dict = {idx: [{'image_id':idx,'caption':sent}] for idx, sent in enumerate(gt_captions)}
+    id_list = range(len(gt_captions))
     scorer = COCOScorer()
     total_score = scorer.score(gt_dict, pred_dict, id_list)
-
-
-def self_test():
-  """Test the translation model."""
-  with tf.Session() as sess:
-    print("Self-test for neural translation model.")
-    # Create model with vocabularies of 10, 2 small buckets, 2 layers of 32.
-    model = seq2seq_model.Seq2SeqModel(10, 10, [(3, 3), (6, 6)], 32, 2,
-                                       5.0, 32, 0.3, 0.99, num_samples=8)
-    sess.run(tf.initialize_all_variables())
-
-    # Fake data set for both the (3, 3) and (6, 6) bucket.
-    data_set = ([([1, 1], [2, 2]), ([3, 3], [4]), ([5], [6])],
-                [([1, 1, 1, 1, 1], [2, 2, 2, 2, 2]), ([3, 3, 3], [5, 6])])
-    for _ in xrange(5):  # Train the fake model for 5 steps.
-      bucket_id = random.choice([0, 1])
-      encoder_inputs, decoder_inputs, target_weights = model.get_batch(
-          data_set, bucket_id)
-      model.step(sess, encoder_inputs, decoder_inputs, target_weights,
-                 bucket_id, False)
-
-
-def init_session(sess, conf='seq2seq.ini'):
-    global gConfig
-    gConfig = get_config(conf)
-
-    # Create model and load parameters.
-    model = create_model(sess, True)
-    model.batch_size = 1  # We decode one sentence at a time.
-
-    # Load vocabularies.
-    enc_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.enc" % gConfig['enc_vocab_size'])
-    dec_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.dec" % gConfig['dec_vocab_size'])
-
-    enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
-    _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
-
-    return sess, model, enc_vocab, rev_dec_vocab
-
-
-def decode_line(sess, model, enc_vocab, rev_dec_vocab, sentence):
-    # Get token-ids for the input sentence.
-    token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
-
-    # Which bucket does it belong to?
-    bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] > len(token_ids)])
-
-    # Get a 1-element batch to feed the sentence to the model.
-    encoder_inputs, decoder_inputs, target_weights = model.get_batch({bucket_id: [(token_ids, [])]}, bucket_id)
-
-    # Get output logits for the sentence.
-    _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs, target_weights, bucket_id, True)
-
-    # This is a greedy decoder - outputs are just argmaxes of output_logits.
-    outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
-
-    # If there is an EOS symbol in outputs, cut them at that point.
-    if data_utils.EOS_ID in outputs:
-        outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-
-    return " ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in outputs])
 
 
 if __name__ == '__main__':

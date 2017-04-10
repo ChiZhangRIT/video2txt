@@ -1,4 +1,4 @@
-## Sentence-to-sentence Model
+## Vector-to-sentence Model
 
 This work is based on easy_seq2seq. Original code can be found [here](https://github.com/suriyadeepan/easy_seq2seq).
 
@@ -6,25 +6,18 @@ This work is based on easy_seq2seq. Original code can be found [here](https://gi
 
 Create directory
 ```
-mkdir log_dir
-mkdir model
+mkdir sentences
+mkdir vectors
 ```
-Download original data
-```
-cd data/
-bash pull_data.sh
-```
-Note that some characters in the original data is not in the right codec. We are using our own dataset.
-
-All sentences pairs were extracted from MSCOCO + Flickr30k + MSR-VTT + MSVD.
+Move the sentences files and corresponding info files under sentences directory.
+Move the vectors files under vectors directory.
 
 ### Training
 
-Edit *seq2seq.ini* file to set *mode = train*. To use pre-trained embedding, set *pretrained_embedding = true*
+Edit *seq2seq.ini* file to set *mode = train*.
 ```
 python execute.py
 ```
-Note: Set *trainable=True* in *embedding = vs.get_variable(...)* (line 762) in *embedding/rnn_cell.py* to enable training on pre-trained embedding.
 Note: To assgin a GPU device, use
 ```
 export CUDA_VISIBLE_DEVICES="0"
@@ -33,13 +26,6 @@ export CUDA_VISIBLE_DEVICES="0"
 ### Evaluation
 
 Edit *seq2seq.ini* file to set *mode = eval*
-```
-python execute.py
-```
-
-### Inference
-
-Edit *seq2seq.ini* file to set *mode = test*
 ```
 python execute.py
 ```

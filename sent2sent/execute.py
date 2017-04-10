@@ -54,7 +54,8 @@ def get_config(config_file='seq2seq.ini'):
 
 # We use a number of buckets and pad to the closest one for efficiency.
 # See seq2seq_model.Seq2SeqModel for details of how they work.
-_buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+# _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+_buckets = [(5, 5), (10, 10), (20, 20), (40, 40), (60, 60)]
 
 
 def read_data(source_path, target_path, max_size=None):
@@ -305,7 +306,7 @@ def scorer():
     id_list = gt_info['ids']
     gt_dict = gt_info['gt']
     pred_dict = {idx: [{'image_id':idx,'caption':sent}] for idx, sent in enumerate(output_captions)}
-    with open(gConfig['model_directory']+gConfig['encoder_test_file'].split('/')[-1][:-4]+'_output.txt','w') as f:
+    with open(gConfig['result_dir']+gConfig['encoder_test_file'].split('/')[-1][:-4]+'_output.txt','w') as f:
         [f.write(i+'\n') for i in output_captions]
     scorer = COCOScorer()
     total_score = scorer.score(gt_dict, pred_dict, id_list)
@@ -379,8 +380,12 @@ if __name__ == '__main__':
         # get configuration from seq2seq.ini
         gConfig = get_config()
 
+    if not tf.gfile.Exists(gConfig['model_directory']):
+        tf.gfile.MakeDirs(gConfig['model_directory'])
     if not tf.gfile.Exists(gConfig['log_dir']):
         tf.gfile.MakeDirs(gConfig['log_dir'])
+    if not tf.gfile.Exists(gConfig['result_dir']):
+        tf.gfile.MakeDirs(gConfig['result_dir'])
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 
