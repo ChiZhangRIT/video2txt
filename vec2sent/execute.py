@@ -176,7 +176,6 @@ def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_siz
         for i in xrange(len(data)):
             tmp = data[i].split()
             del tmp[0]
-            # pdb.set_trace()
             source_vectors.append(np.asarray(tmp, dtype=np.float32))
         del tmp, data
     else:
