@@ -18,6 +18,7 @@ sent2vec/vectors/
 vec2sent/data/
 vec2sent/model/
 vec2sent/log_dir/
+vec2sent/results/
 vec2sent/sentences/
 vec2sent/vectors/
 !vec2sent/sentences/sample.txt
