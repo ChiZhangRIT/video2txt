@@ -49,7 +49,7 @@ class Seq2SeqModel(object):
   def __init__(self, target_vocab_size, buckets, size,
                num_layers, max_gradient_norm, batch_size, learning_rate,
                learning_rate_decay_factor, use_lstm=False,
-               num_samples=512, forward_only=False):
+               num_samples=512, forward_only=False, vector_src='sent2vec'):
     """Create the model.
 
     Args:
@@ -80,6 +80,14 @@ class Seq2SeqModel(object):
         self.learning_rate * learning_rate_decay_factor)
     self.global_step = tf.Variable(0, trainable=False)
 
+    if vector_src == 'sent2vec':
+        self.vec_size = 300
+    elif vector_src == 'skipthought':
+        self.vec_size = 4800
+    elif vector_src == 'skipgram':
+        self.vec_size = 100
+    else:
+        raise ValueError("%d cannot be regonized." % gConfig['vector_src'])
     # If we use sampled softmax, we need an output projection.
     output_projection = None
     softmax_loss_function = None
@@ -114,15 +122,15 @@ class Seq2SeqModel(object):
             num_decoder_symbols=target_vocab_size,
             embedding_size=size,
             output_projection=output_projection,
-            feed_previous=do_decode)
-
+            feed_previous=do_decode,
+            vector_src=vector_src)
 
     # Feeds for inputs.
     self.encoder_inputs = []
     self.decoder_inputs = []
     self.target_weights = []
     for i in xrange(buckets[-1][0]):  # Last bucket is the biggest one.
-        self.encoder_inputs.append(tf.placeholder(tf.float32, shape=[None,self.layer_size],
+        self.encoder_inputs.append(tf.placeholder(tf.float32, shape=[None,self.vec_size],
                                                   name="encoder{0}".format(i)))
     for i in xrange(buckets[-1][1] + 1):
         self.decoder_inputs.append(tf.placeholder(tf.int32, shape=[None],
@@ -148,7 +156,6 @@ class Seq2SeqModel(object):
                     for output in self.outputs[b]
                 ]
     else:
-        # sent2sent
         self.outputs, self.losses = s2s.model_with_buckets(
             self.encoder_inputs, self.decoder_inputs, targets,
             self.target_weights, buckets,
@@ -276,7 +283,7 @@ class Seq2SeqModel(object):
             encoder_input, decoder_input = data
 
         # Encoder inputs are padded and then reversed.
-        PAD_VEC = [0] * self.layer_size  # convert data_utils.PAD_ID to 300-d vector
+        PAD_VEC = [0] * self.vec_size  # convert data_utils.PAD_ID to 300-d vector
         encoder_pad = [PAD_VEC] * (encoder_size - len(encoder_input))
         encoder_inputs.append(list(reversed(encoder_input + encoder_pad)))
 
@@ -291,8 +298,8 @@ class Seq2SeqModel(object):
     # Batch encoder inputs are just re-indexed encoder_inputs.
     for length_idx in xrange(encoder_size):
         batch_encoder_inputs.append(
-            np.array([encoder_inputs[batch_idx][length_idx]
-                      for batch_idx in xrange(self.batch_size)], dtype=np.float32))
+        np.array([encoder_inputs[batch_idx][length_idx]
+                  for batch_idx in xrange(self.batch_size)], dtype=np.float32))
 
     # Batch decoder inputs are re-indexed decoder_inputs, we create weights.
     for length_idx in xrange(decoder_size):

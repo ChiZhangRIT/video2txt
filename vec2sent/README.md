@@ -34,5 +34,5 @@ python execute.py
 
 Run a TensorBoard server in a separate process for real-time monitoring of training progress and evaluation metrics.
 ```
-tensorboard --logdir=log_dir/ --port=6364
+tensorboard --logdir=log_dir/ --port=2941
 ```

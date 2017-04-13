@@ -30,6 +30,7 @@ from six.moves import zip     # pylint: disable=redefined-builtin
 
 import tensorflow as tf
 import numpy as np
+import copy
 import pdb
 
 from tensorflow.python import shape
@@ -324,7 +325,6 @@ def embedding_attention_decoder(decoder_inputs,
         loop_function=loop_function,
         initial_state_attention=initial_state_attention)
 
-
 def embedding_attention_seq2seq(encoder_inputs,
                                 decoder_inputs,
                                 cell,
@@ -336,7 +336,8 @@ def embedding_attention_seq2seq(encoder_inputs,
                                 feed_previous=False,
                                 dtype=None,
                                 scope=None,
-                                initial_state_attention=False):
+                                initial_state_attention=False,
+                                vector_src='sent2vec'):
   """Embedding sequence-to-sequence model with attention.
 
   This model first embeds encoder_inputs by a newly created embedding (of shape
@@ -372,6 +373,7 @@ def embedding_attention_seq2seq(encoder_inputs,
     initial_state_attention: If False (default), initial attentions are zero.
       If True, initialize the attentions from the initial state and attention
       states.
+    vector_src: one of the following: 'sent2vec', 'skipthought', 'skipgram'.
 
   Returns:
     A tuple of the form (outputs, state), where:
@@ -384,12 +386,16 @@ def embedding_attention_seq2seq(encoder_inputs,
   with variable_scope.variable_scope(
       scope or "embedding_attention_seq2seq", dtype=dtype) as scope:
     dtype = scope.dtype
+    # input projection
+    if vector_src == 'skipthought' or vector_src == 'skipgram':
+        cell = rnn_cell.InputProjectionWrapper(cell, embedding_size)
+
     # Encoder.
+    encoder_cell = copy.deepcopy(cell)
     # init = tf.constant(np.load(pretrained_embedding_path))
     # encoder_cell = rnn_cell.EmbeddingWrapper(
-    #     cell, embedding_classes=num_encoder_symbols,
+    #     encoder_cell, embedding_classes=num_encoder_symbols,
     #     embedding_size=embedding_size, initializer=init)
-    encoder_cell = cell
 
     encoder_outputs, encoder_state = rnn.rnn(
         encoder_cell, encoder_inputs, dtype=dtype)

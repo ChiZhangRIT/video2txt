@@ -147,7 +147,7 @@ def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_siz
         Put them into buckets.
 
     Args:
-    vec_enc: the pkl file for the source vectors.
+    vec_enc: the pkl/np file for the source vectors. Read as list of numpy arrays.
     info_file: infomation file for the vectors in vec_enc. json format.
     sent_dec: path to the file with token-ids for the target language;
         it must be aligned with vec_enc: n-th line contains the desired
@@ -163,8 +163,25 @@ def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_siz
     """
     data_set = [[] for _ in _buckets]
     data_info = [[] for _ in _buckets]
-    with open(vec_enc, 'r') as source_file:
-        source_vectors = pkl.load(source_file)
+    if gConfig['vector_src'] == 'sent2vec':
+        with open(vec_enc, 'r') as source_file:
+            source_vectors = pkl.load(source_file)
+    elif gConfig['vector_src'] == 'skipthought':
+        source_vectors = list(np.load(vec_enc))
+    elif gConfig['vector_src'] == 'skipgram':
+        with open(vec_enc, 'r') as source_file:
+            data = source_file.read().split('\n')
+        del data[0], data[-1]
+        source_vectors = []
+        for i in xrange(len(data)):
+            tmp = data[i].split()
+            del tmp[0]
+            # pdb.set_trace()
+            source_vectors.append(np.asarray(tmp, dtype=np.float32))
+        del tmp, data
+    else:
+        raise ValueError("%d cannot be regonized." % gConfig['vector_src'])
+
     with open(source_info_file, 'r') as source_information_file:
         source_info = json.load(source_information_file)
     with open(target_info_file, 'r') as target_information_file:
@@ -211,7 +228,8 @@ def read_vec_sent(vec_enc, source_info_file, sent_dec, target_info_file, max_siz
 def create_model(session, forward_only):
 
   """Create model and initialize or load parameters"""
-  model = seq2seq_model.Seq2SeqModel(gConfig['dec_vocab_size'], _buckets, gConfig['layer_size'], gConfig['num_layers'], gConfig['max_gradient_norm'], gConfig['batch_size'], gConfig['learning_rate'], gConfig['learning_rate_decay_factor'], forward_only=forward_only)
+  model = seq2seq_model.Seq2SeqModel(gConfig['dec_vocab_size'], _buckets, gConfig['layer_size'], gConfig['num_layers'], gConfig['max_gradient_norm'], gConfig['batch_size'], gConfig['learning_rate'], gConfig['learning_rate_decay_factor'], forward_only=forward_only,
+  vector_src=gConfig['vector_src'])
 
   if 'pretrained_model' in gConfig:
       model.saver.restore(session,gConfig['pretrained_model'])
@@ -220,8 +238,8 @@ def create_model(session, forward_only):
   ckpt = tf.train.get_checkpoint_state(gConfig['model_directory'])
   if ckpt and ckpt.model_checkpoint_path:
       print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-    #   model.saver.restore(session, ckpt.model_checkpoint_path)
-      model.saver.restore(session, "model/test/seq2seq.ckpt-171500")
+      model.saver.restore(session, ckpt.model_checkpoint_path)
+      # model.saver.restore(session, "model/test/seq2seq.ckpt-171500")
   else:
       print("Created model with fresh parameters.")
       session.run(tf.global_variables_initializer())
@@ -393,17 +411,18 @@ if __name__ == '__main__':
         # get configuration from seq2seq.ini
         gConfig = get_config()
 
+    if not tf.gfile.Exists(gConfig['model_directory']):
+        tf.gfile.MakeDirs(gConfig['model_directory'])
     if not tf.gfile.Exists(gConfig['log_dir']):
         tf.gfile.MakeDirs(gConfig['log_dir'])
+    if not tf.gfile.Exists(gConfig['result_dir']):
+        tf.gfile.MakeDirs(gConfig['result_dir'])
 
     print('\n>> Mode : %s\n' %(gConfig['mode']))
 
     if gConfig['mode'] == 'train':
         # start training
         train()
-    elif gConfig['mode'] == 'test':
-        # interactive decode
-        decode()
     elif gConfig['mode'] == 'eval':
         scorer()
     else:
