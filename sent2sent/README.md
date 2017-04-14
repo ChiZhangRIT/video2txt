@@ -18,6 +18,7 @@ Note that some characters in the original data is not in the right codec. We are
 
 All sentences pairs were extracted from MSCOCO + Flickr30k + MSR-VTT + MSVD.
 
+
 ### Training
 
 Edit *seq2seq.ini* file to set *mode = train*. To use pre-trained embedding, set *pretrained_embedding = true*

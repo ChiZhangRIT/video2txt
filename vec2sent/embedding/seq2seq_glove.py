@@ -253,7 +253,8 @@ def embedding_attention_decoder(decoder_inputs,
                                 update_embedding_for_previous=True,
                                 dtype=None,
                                 scope=None,
-                                initial_state_attention=False):
+                                initial_state_attention=False,
+                                pretrained_embedding_path=None):
   """RNN decoder with embedding and attention and a pure-decoding option.
 
   Args:
@@ -282,7 +283,7 @@ def embedding_attention_decoder(decoder_inputs,
       no effect if feed_previous=False.
     dtype: The dtype to use for the RNN initial states (default: tf.float32).
     scope: VariableScope for the created subgraph; defaults to
-      "embedding_attention_decoder".
+      "embedding_attention_decoder". (deprecated)
     initial_state_attention: If False (default), initial attentions are zero.
       If True, initialize the attentions from the initial state and attention
       states -- useful when we wish to resume decoding from a previously
@@ -304,11 +305,13 @@ def embedding_attention_decoder(decoder_inputs,
       proj_biases = ops.convert_to_tensor(output_projection[1], dtype=dtype)
       proj_biases.get_shape().assert_is_compatible_with([num_symbols])
 
-  with variable_scope.variable_scope(
-      scope or "embedding_attention_decoder", dtype=dtype) as scope:
-
+  with variable_scope.variable_scope("embedding_attention_decoder", dtype=dtype) as scope:
+      init = tf.constant(np.load(pretrained_embedding_path))  # use glove
       embedding = variable_scope.get_variable("embedding",
-                                            [num_symbols, embedding_size])
+                    initializer=init, trainable = True)
+    #   embedding = variable_scope.get_variable("embedding",
+    #                                         [num_symbols, embedding_size])
+
       loop_function = _extract_argmax_and_embed(
           embedding, output_projection,
           update_embedding_for_previous) if feed_previous else None
@@ -316,14 +319,14 @@ def embedding_attention_decoder(decoder_inputs,
           embedding_ops.embedding_lookup(embedding, i) for i in decoder_inputs]
 
       return attention_decoder(
-        emb_inp,
-        initial_state,
-        attention_states,
-        cell,
-        output_size=output_size,
-        num_heads=num_heads,
-        loop_function=loop_function,
-        initial_state_attention=initial_state_attention)
+            emb_inp,
+            initial_state,
+            attention_states,
+            cell,
+            output_size=output_size,
+            num_heads=num_heads,
+            loop_function=loop_function,
+            initial_state_attention=initial_state_attention)
 
 def embedding_attention_seq2seq(encoder_inputs,
                                 decoder_inputs,
@@ -337,7 +340,8 @@ def embedding_attention_seq2seq(encoder_inputs,
                                 dtype=None,
                                 scope=None,
                                 initial_state_attention=False,
-                                vector_src='sent2vec'):
+                                vector_src='sent2vec',
+                                pretrained_embedding_path=None):
   """Embedding sequence-to-sequence model with attention.
 
   This model first embeds encoder_inputs by a newly created embedding (of shape
@@ -369,7 +373,7 @@ def embedding_attention_seq2seq(encoder_inputs,
       If False, decoder_inputs are used as given (the standard decoder case).
     dtype: The dtype of the initial RNN state (default: tf.float32).
     scope: VariableScope for the created subgraph; defaults to
-      "embedding_attention_seq2seq".
+      "embedding_attention_seq2seq". (deprecated)
     initial_state_attention: If False (default), initial attentions are zero.
       If True, initialize the attentions from the initial state and attention
       states.
@@ -383,12 +387,12 @@ def embedding_attention_seq2seq(encoder_inputs,
       state: The state of each decoder cell at the final time-step.
         It is a 2D Tensor of shape [batch_size x cell.state_size].
   """
-  with variable_scope.variable_scope(
-      scope or "embedding_attention_seq2seq", dtype=dtype) as scope:
+  with variable_scope.variable_scope("embedding_attention_seq2seq", dtype=dtype) as scope:
     dtype = scope.dtype
-    # input projection
-    if vector_src == 'skipthought' or vector_src == 'skipgram':
-        cell = rnn_cell.InputProjectionWrapper(cell, embedding_size)
+
+    # # input projection
+    # if vector_src == 'skipthought' or vector_src == 'skipgram':
+    #     cell = rnn_cell.InputProjectionWrapper(cell, embedding_size)
 
     # Encoder.
     encoder_cell = copy.deepcopy(cell)
@@ -408,22 +412,25 @@ def embedding_attention_seq2seq(encoder_inputs,
     # Decoder.
     output_size = None
     if output_projection is None:
-      cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
-      output_size = num_decoder_symbols
-    if isinstance(feed_previous, bool):
+        cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
+        output_size = num_decoder_symbols
+    else:
+        cell = rnn_cell.OutputProjectionWrapper(cell, 300)  # glove szie = 300
 
-      return embedding_attention_decoder(
-          decoder_inputs,
-          encoder_state,
-          attention_states,
-          cell,
-          num_decoder_symbols,
-          embedding_size,
-          num_heads=num_heads,
-          output_size=output_size,
-          output_projection=output_projection,
-          feed_previous=feed_previous,
-          initial_state_attention=initial_state_attention)
+    if isinstance(feed_previous, bool):
+        return embedding_attention_decoder(
+              decoder_inputs,
+              encoder_state,
+              attention_states,
+              cell,
+              num_decoder_symbols,
+              embedding_size,
+              num_heads=num_heads,
+              output_size=output_size,
+              output_projection=output_projection,
+              feed_previous=feed_previous,
+              initial_state_attention=initial_state_attention,
+              pretrained_embedding_path=pretrained_embedding_path)
 
     # If feed_previous is a Tensor, we construct 2 graphs and use cond.
     def decoder(feed_previous_bool):

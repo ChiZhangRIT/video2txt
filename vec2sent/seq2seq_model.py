@@ -49,7 +49,8 @@ class Seq2SeqModel(object):
   def __init__(self, target_vocab_size, buckets, size,
                num_layers, max_gradient_norm, batch_size, learning_rate,
                learning_rate_decay_factor, use_lstm=False,
-               num_samples=512, forward_only=False, vector_src='sent2vec'):
+               num_samples=512, forward_only=False, vector_src='sent2vec',
+               pretrained_embedding_path=None):
     """Create the model.
 
     Args:
@@ -70,6 +71,7 @@ class Seq2SeqModel(object):
       use_lstm: if true, we use LSTM cells instead of GRU cells.
       num_samples: number of samples for sampled softmax.
       forward_only: if set, we do not construct the backward pass in the model.
+      pretrained_embedding_path: path to GloVe embedding.
     """
     self.target_vocab_size = target_vocab_size
     self.buckets = buckets
@@ -93,10 +95,19 @@ class Seq2SeqModel(object):
     softmax_loss_function = None
     # Sampled softmax only makes sense if we sample less than vocabulary size.
     if num_samples > 0 and num_samples < self.target_vocab_size:
-        # train projection from scratch
-        w = tf.get_variable("proj_w", [size, self.target_vocab_size])
-        w_t = tf.transpose(w)
-        b = tf.get_variable("proj_b", [self.target_vocab_size])
+        if False:  # turned out that GloVe proj make performance worse
+            # train projection from scratch
+            w = tf.get_variable("proj_w", [size, self.target_vocab_size])
+            w_t = tf.transpose(w)
+            b = tf.get_variable("proj_b", [self.target_vocab_size])
+        else:
+            # projection using GloVe transposed
+            w_init = tf.constant(np.load(pretrained_embedding_path))
+            w_glove = tf.get_variable("proj_w", initializer=w_init, trainable=True)
+            w = tf.transpose(w_glove)
+            w_t = tf.transpose(w)
+            b_init = tf.zeros([self.target_vocab_size])
+            b = tf.get_variable("proj_b", initializer=b_init, trainable=True)
         output_projection = (w, b)
 
         def sampled_loss(inputs, labels):
@@ -123,7 +134,8 @@ class Seq2SeqModel(object):
             embedding_size=size,
             output_projection=output_projection,
             feed_previous=do_decode,
-            vector_src=vector_src)
+            vector_src=vector_src,
+            pretrained_embedding_path=pretrained_embedding_path)
 
     # Feeds for inputs.
     self.encoder_inputs = []
