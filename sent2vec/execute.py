@@ -53,7 +53,8 @@ def get_config(config_file='seq2seq.ini'):
 
 # We use a number of buckets and pad to the closest one for efficiency.
 # See seq2seq_model.Seq2SeqModel for details of how they work.
-_buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+# _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+_buckets = [(5, 5), (10, 10), (20, 20), (40, 40), (60, 60)]
 
 
 def read_data(source_path, target_path, max_size=None):
@@ -296,7 +297,7 @@ def scorer():
         try:
             bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
         except:
-            # if sentence length greater than 50
+            # if sentence length greater than the largest bucket size
             pdb.set_trace()
 
         # Get a 1-element batch to feed the sentence to the model.

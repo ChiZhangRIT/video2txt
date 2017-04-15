@@ -91,9 +91,20 @@ class Seq2SeqModel(object):
     softmax_loss_function = None
     # Sampled softmax only makes sense if we sample less than vocabulary size.
     if num_samples > 0 and num_samples < self.target_vocab_size:
-        w = tf.get_variable("proj_w", [size, self.target_vocab_size])
-        w_t = tf.transpose(w)
-        b = tf.get_variable("proj_b", [self.target_vocab_size])
+        # if not self.use_pretrained_embedding:
+        if False:  # turned out that GloVe proj make performance worse
+            # train projection from scratch
+            w = tf.get_variable("proj_w", [size, self.target_vocab_size])
+            w_t = tf.transpose(w)
+            b = tf.get_variable("proj_b", [self.target_vocab_size])
+        else:
+            # projection using GloVe transposed
+            w_init = tf.constant(np.load(pretrained_embedding_path))
+            w_glove = tf.get_variable("proj_w", initializer=w_init, trainable=True)
+            w = tf.transpose(w_glove)
+            w_t = tf.transpose(w)
+            b_init = tf.zeros([self.target_vocab_size])
+            b = tf.get_variable("proj_b", initializer=b_init, trainable=True)
         output_projection = (w, b)
 
         def sampled_loss(inputs, labels):

@@ -30,6 +30,7 @@ from six.moves import zip     # pylint: disable=redefined-builtin
 
 import tensorflow as tf
 import numpy as np
+import copy
 import pdb
 
 from tensorflow.python import shape
@@ -279,7 +280,7 @@ def embedding_attention_decoder(decoder_inputs,
       no effect if feed_previous=False.
     dtype: The dtype to use for the RNN initial states (default: tf.float32).
     scope: VariableScope for the created subgraph; defaults to
-      "embedding_attention_decoder".
+      "embedding_attention_decoder". (deprecated)
     initial_state_attention: If False (default), initial attentions are zero.
       If True, initialize the attentions from the initial state and attention
       states -- useful when we wish to resume decoding from a previously
@@ -301,11 +302,13 @@ def embedding_attention_decoder(decoder_inputs,
     proj_biases = ops.convert_to_tensor(output_projection[1], dtype=dtype)
     proj_biases.get_shape().assert_is_compatible_with([num_symbols])
 
-  with variable_scope.variable_scope(
-      scope or "embedding_attention_decoder", dtype=dtype) as scope:
+  embedding = [v for v in tf.global_variables()
+              if v.name == "embedding_attention_seq2seq/RNN/EmbeddingWrapper/embedding:0"][0]
 
-    embedding = variable_scope.get_variable("embedding",
-                                            [num_symbols, embedding_size])
+  with variable_scope.variable_scope("embedding_attention_decoder", dtype=dtype) as scope:
+
+    # embedding = variable_scope.get_variable("embedding",
+    #                                         [num_symbols, embedding_size])
     loop_function = _extract_argmax_and_embed(
         embedding, output_projection,
         update_embedding_for_previous) if feed_previous else None
@@ -365,7 +368,7 @@ def embedding_attention_seq2seq(encoder_inputs,
       If False, decoder_inputs are used as given (the standard decoder case).
     dtype: The dtype of the initial RNN state (default: tf.float32).
     scope: VariableScope for the created subgraph; defaults to
-      "embedding_attention_seq2seq".
+      "embedding_attention_seq2seq". (deprecated)
     initial_state_attention: If False (default), initial attentions are zero.
       If True, initialize the attentions from the initial state and attention
       states.
@@ -378,18 +381,18 @@ def embedding_attention_seq2seq(encoder_inputs,
       state: The state of each decoder cell at the final time-step.
         It is a 2D Tensor of shape [batch_size x cell.state_size].
   """
-  with variable_scope.variable_scope(
-      scope or "embedding_attention_seq2seq", dtype=dtype) as scope:
+  with variable_scope.variable_scope("embedding_attention_seq2seq", dtype=dtype) as scope:
     dtype = scope.dtype
+
     # Encoder.
-    init = tf.constant(np.load(pretrained_embedding_path))
+    encoder_cell = copy.deepcopy(cell)
+    init = tf.constant(np.load(pretrained_embedding_path))  # use glove
     encoder_cell = rnn_cell.EmbeddingWrapper(
-        cell, embedding_classes=num_encoder_symbols,
-        embedding_size=embedding_size, initializer=init)
+        encoder_cell, embedding_classes=num_encoder_symbols,
+        embedding_size=300, initializer=init)
+        # embedding_size=embedding_size, initializer=init)
     encoder_outputs, encoder_state = rnn.rnn(
         encoder_cell, encoder_inputs, dtype=dtype)
-
-    # pdb.set_trace()  # we are interested in encoder_state[-1]
 
     # First calculate a concatenation of encoder outputs to put attention on.
     top_states = [array_ops.reshape(e, [-1, 1, cell.output_size])
@@ -399,11 +402,13 @@ def embedding_attention_seq2seq(encoder_inputs,
     # Decoder.
     output_size = None
     if output_projection is None:
-      cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
-      output_size = num_decoder_symbols
+        cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
+        output_size = num_decoder_symbols
+    else:
+        cell = rnn_cell.OutputProjectionWrapper(cell, 300)  # glove szie = 300
 
     if isinstance(feed_previous, bool):
-        return encoder_state
+        return encoder_state  # we are interested in encoder_state[-1]
         # return embedding_attention_decoder(
         #     decoder_inputs,
         #     encoder_state,

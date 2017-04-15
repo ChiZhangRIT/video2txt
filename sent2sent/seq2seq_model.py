@@ -75,7 +75,7 @@ class Seq2SeqModel(object):
       forward_only: if set, we do not construct the backward pass in the model.
       use_pretrained_embedding: if true, use GloVe embedding.
       pretrained_embedding_path: path to GloVe embedding,
-      pretrained_projection_path: path to projection matrix in decoder.
+      pretrained_projection_path: path to projection matrix in decoder. (deprecated)
     """
     self.source_vocab_size = source_vocab_size
     self.target_vocab_size = target_vocab_size
