@@ -54,8 +54,8 @@ def get_config(config_file='seq2seq.ini'):
 
 # We use a number of buckets and pad to the closest one for efficiency.
 # See seq2seq_model.Seq2SeqModel for details of how they work.
-# _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
-_buckets = [(5, 5), (10, 10), (20, 20), (40, 40), (60, 60)]
+_buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+# _buckets = [(15, 15), (25, 25), (35, 35), (45, 45), (60, 60)]
 
 
 def read_data(source_path, target_path, max_size=None):
@@ -117,11 +117,14 @@ def create_model(session, forward_only):
 
   ckpt = tf.train.get_checkpoint_state(gConfig['model_directory'])
   if ckpt and ckpt.model_checkpoint_path:
-    print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-    model.saver.restore(session, ckpt.model_checkpoint_path)
+      print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+      model.saver.restore(session, ckpt.model_checkpoint_path)
+    #   print("Reading parameters from previous model ...")
+    #   model.saver.restore(session, "model/finetune_1024units_noatt/seq2seq.ckpt-100000")
+
   else:
-    print("Created model with fresh parameters.")
-    session.run(tf.global_variables_initializer())
+      print("Created model with fresh parameters.")
+      session.run(tf.global_variables_initializer())
   return model
 
 
@@ -200,15 +203,25 @@ def train():
       current_step += 1
 
       # Once in a while, we save checkpoint, print statistics, and run evals.
-      if current_step % gConfig['steps_per_checkpoint'] == 0:
+      if current_step % gConfig['steps_per_checkpoint'] == 0 or current_step == 1:
         # Print statistics for the previous epoch.
-        perplexity = math.exp(loss) if loss < 300 else float('inf')
-        print ("global step %d learning rate %.4f step-time %.2f loss %.4f perplexity "
+        if current_step == 1:
+            # change learning rate in fine-tuning
+            # sess.run(model.learning_rate.assign(
+            #     tf.Variable(float(0.0005), trainable=False)))
+            # sess.run(model.learning_rate_finetune_op)
+            perplexity = math.exp(step_loss) if step_loss < 300 else float('inf')
+            print ("global step %d learning rate %.4f loss %.4f perplexity %.2f"
+                % (model.global_step.eval(), model.learning_rate.eval(),
+                step_loss, perplexity))
+        else:
+            perplexity = math.exp(loss) if loss < 300 else float('inf')
+            print ("global step %d learning rate %.4f step-time %.2f loss %.4f perplexity "
                "%.2f" % (model.global_step.eval(), model.learning_rate.eval(),
                          step_time, loss, perplexity))
         # Decrease learning rate if no improvement was seen over last 3 times.
         if len(previous_losses) > 2 and loss > max(previous_losses[-3:]):
-          sess.run(model.learning_rate_decay_op)
+            sess.run(model.learning_rate_decay_op)
         previous_losses.append(loss)
         # Save checkpoint and zero timer and loss.
         checkpoint_path = os.path.join(gConfig['model_directory'], "seq2seq.ckpt")
