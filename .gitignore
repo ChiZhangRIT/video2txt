@@ -24,3 +24,8 @@ vec2sent/vectors/
 !vec2sent/sentences/sample.txt
 !vec2sent/vectors/sample.pkl
 
+hrne/log/
+hrne/model/
+hrne/sentences/
+hrne/skipthought/
+hrne/tacos/

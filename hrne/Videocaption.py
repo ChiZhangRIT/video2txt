@@ -2,7 +2,7 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 import os, h5py, sys, argparse
-import ipdb, pdb
+import pdb
 # from IPython.core.debugger import Tracer
 # from ptbtokenizer import PTBTokenizer
 import time
@@ -43,7 +43,7 @@ def orthogonal_initializer(scale=1.0):
 
         return tf.constant(scale * q[:shape[0], :shape[1]], dtype=tf.float32)
     return _initializer
-	
+
 def multiple_gaussians(x, W_mu,W_sigma,b_mu,b_sigma, h_prev,number_gaussians,length_elements,alphas_last_dim):
 
     mu = tf.matmul(W_mu, h_prev)+b_mu #1x100
@@ -70,8 +70,9 @@ def multiple_gaussians(x, W_mu,W_sigma,b_mu,b_sigma, h_prev,number_gaussians,len
     alphas = tf.div(alphas, tf.cast(number_gaussians,tf.float32))
 
     return alphas
-	
+
 class Video_Caption_Generator():
+
     def __init__(self, dim_image, n_words, dim_hidden, batch_size, n_lstm_steps, drop_out_rate, beam_size,dim_embedding, bias_init_vector=None):
         self.dim_image = dim_image
         self.n_words = n_words
@@ -109,7 +110,6 @@ class Video_Caption_Generator():
         self.embed_att_Ua_2 = tf.Variable(tf.random_uniform([dim_hidden_hrne_layer, dim_hidden_hrne_layer],-0.1,0.1), name='embed_att_Ua_2')
         self.embed_att_ba_2 = tf.Variable( tf.zeros([dim_hidden_hrne_layer]), name='embed_att_ba_2')
         ########################################################################################
-
         #Third attention between the output of our HRNE and the description decoder
         self.W_mu_3 = tf.Variable(tf.div(tf.random_uniform([no_gaussians_third_layer, dim_hidden_gaussian],-0.1,0.1), tf.sqrt(tf.add(1.0, dim_hidden))), name='W_mu_3') #1x512
         self.W_sigma_3 = tf.Variable(tf.div(tf.random_uniform([no_gaussians_third_layer, dim_hidden_gaussian],-0.1,0.1), tf.sqrt(tf.add(1.0, dim_hidden))), name='W_sigma_3')
@@ -193,7 +193,7 @@ class Video_Caption_Generator():
             denomin_2 = tf.reduce_sum(e_hat_exp_2,0) # b
             denomin_2 = denomin_2 + tf.to_float(tf.equal(denomin_2, 0))   # regularize denominator
             alphas_2 = tf.tile(tf.expand_dims(tf.div(e_hat_exp_2,denomin_2),2),[1,1,self.dim_hidden]) # n x b x h  # normalize to obtain alpha
-            
+
             attention_list_2 = tf.mul(alphas_2, input_second_LSTM) # n x b x h
             atten_2 = tf.reduce_sum(attention_list_2,0) # b x h       #  soft-attention weighted sum
             if j>0: tf.get_variable_scope().reuse_variables()
@@ -237,7 +237,6 @@ class Video_Caption_Generator():
 
 
         return loss_caption, video, video_mask, caption, caption_mask, summary_op
-
 
     def build_generator(self):
         generated_words = []
@@ -312,7 +311,7 @@ class Video_Caption_Generator():
             denomin_2 = tf.reduce_sum(e_hat_exp_2,0) # b
             denomin_2 = denomin_2 + tf.to_float(tf.equal(denomin_2, 0))   # regularize denominator
             alphas_2 = tf.tile(tf.expand_dims(tf.div(e_hat_exp_2,denomin_2),2),[1,1,self.dim_hidden]) # n x b x h  # normalize to obtain alpha
-            
+
             attention_list_2 = tf.mul(alphas_2, input_second_LSTM) # n x b x h
             atten_2 = tf.reduce_sum(attention_list_2,0) # b x h       #  soft-attention weighted sum
             if j>0: tf.get_variable_scope().reuse_variables()
@@ -406,7 +405,7 @@ class Video_Caption_Generator():
 
                 out_top_index = tf.pack(out_top_index)
                 out_top_value = tf.pack(out_top_value)
-                
+
                 generated_words.append(out_top_index)
                 generated_words_value.append(out_top_value)
         generated_words = tf.transpose(tf.pack(generated_words),[1,0,2])

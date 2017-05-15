@@ -3,11 +3,10 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 import os, h5py, sys, argparse
-import ipdb, pdb
-# from IPython.core.debugger import Tracer
-# from ptbtokenizer import PTBTokenizer
+import pdb
 import time
 import json
+from tqdm import *
 from collections import defaultdict
 from tensorflow.python.ops import rnn, rnn_cell
 from keras.preprocessing import sequence
@@ -17,14 +16,113 @@ import unicodedata
 # import Videocaption
 from Videocaption import Video_Caption_Generator
 
+try:
+    from ConfigParser import SafeConfigParser
+except:
+    from configparser import SafeConfigParser # In Python 3, ConfigParser has been renamed to configparser for PEP 8 compliance.
+
+# use a number of buckets and pad to the closest one for efficiency.
+buckets = [20, 40]
+
+gConfig = {}
+def get_config(config_file='arguments.ini'):
+    parser = SafeConfigParser()
+    parser.read(config_file)
+    # get the ints, floats, strings and booleans
+    _conf_ints = [ (key, int(value)) for key,value in parser.items('ints') ]
+    _conf_floats = [ (key, float(value)) for key,value in parser.items('floats') ]
+    _conf_strings = [ (key, str(value)) for key,value in parser.items('strings') ]
+    _conf_booleans = [ (name, parser.getboolean('booleans', name))
+                        for name in parser.options('booleans') ]
+    return dict(_conf_ints + _conf_floats + _conf_strings + _conf_booleans)
+
+def bucketing(vec_count, buckets, vec_dim, curr_sample):
+    ''' throw a sample into corresponding bucket.
+
+    Args:
+    vec_count: count the number of vectors in current sample.
+    vec_dim: dimension of sentence vectors.
+    curr_sample: current sample, must be an numpy array.
+
+    Returns:
+    bucket_id: id of bucket for current sample.
+    curr_sample: updated current sample.
+    '''
+    try:
+        bucket_id = min([i for i in xrange(len(buckets))
+                         if vec_count <= buckets[i]])
+        # padding 0 vectors if num of sentences is less than current bucket
+        num_pad = buckets[bucket_id] - vec_count
+        pad = np.zeros((num_pad, vec_dim))
+        curr_sample = np.vstack((curr_sample, pad))  # shape (buckets[bucket_id], vec_dim)
+    except:
+        bucket_id = len(buckets) - 1
+        # chop off extra sentences
+        curr_sample = curr_sample[:buckets[-1], :]
+    return bucket_id, curr_sample
+
+def load_data(vec_file, info_file, buckets):
+    """ load data into batches.
+
+    Args:
+    vec_file: a numpy file containing the vector representation of sentences.
+    info_file: an infomation file specifying the sequence and instance ids of
+               the sentences in vec_file.
+    buckets: bucket list dealing with variation of number of sentences.
+
+    Returns:
+    data: a dict of buckets (as lists) of encoder inputs. data[bucket_id] has shape of (num_sample_in_this_bucket, bucket[bucket_id], vec_dim)
+
+    Raises:
+    ValueError: if length of seq id and ins id are not identical.
+    ValueError: if vec_file does not correspond to info_file.
+    """
+    vectors = np.load(vec_file)
+    with open(info_file, 'r') as f:
+        info = json.load(f)
+
+    if len(info['sequence_id_list']) != len(info['instance_id_list']):
+        raise ValueError('Invalid info file: len(info[''sequence_id_list'']) should be equal to len(info[''instance_id_list'']) but got %d != %d' % (len(info['sequence_id_list']), len(info['instance_id_list'])))
+    if vectors.shape[0] != len(info['instance_id_list']):
+        raise ValueError('Number of vectors and length of info list are not identical. %d != %d' % (len(info['sequence_id_list']), len(info['instance_id_list'])))
+
+    num_vec, vec_dim = vectors.shape
+    seq_ids, ins_ids = [], []
+    bucket_ids = []
+    prev_seq_id, prev_ins_id = None, None
+    data = {i: [] for i in xrange(len(buckets))}
+
+    for vec_idx in tqdm(xrange(num_vec)):
+        curr_seq_id, curr_ins_id = info['sequence_id_list'][vec_idx], info['instance_id_list'][vec_idx]
+        if curr_seq_id != prev_seq_id or curr_ins_id != prev_ins_id:
+            seq_ids.append(curr_seq_id)
+            ins_ids.append(curr_ins_id)
+            if prev_seq_id is not None:
+                bucket_id, curr_sample = bucketing(vec_count, buckets, vec_dim, curr_sample)
+                bucket_ids.append(bucket_id)
+                data[bucket_id].append(curr_sample)
+            vec_count = 1
+            curr_sample = vectors[vec_idx]
+        else:
+            vec_count += 1
+            curr_sample = np.vstack((curr_sample, vectors[vec_idx]))
+        prev_seq_id = curr_seq_id
+        prev_ins_id = curr_ins_id
+
+    # throw the last sample into bucket
+    bucket_id, curr_sample = bucketing(vec_count, buckets, vec_dim, curr_sample)
+    bucket_ids.append(bucket_id)
+    data[bucket_id].append(curr_sample)
+
+    return data, seq_ids, ins_ids, bucket_ids
 
 def parse_args():
     """
     Parse input arguments
     """
     parser = argparse.ArgumentParser(description='Extract a CNN features')
-    parser.add_argument('--gpu', dest='gpu_id', help='GPU id to use',
-                        default=0, type=int)
+    # parser.add_argument('--gpu', dest='gpu_id', help='GPU id to use',
+    #                     default=0, type=int)
     parser.add_argument('--net', dest='model',
                         help='model to test',
                         default=None, type=str)
@@ -81,33 +179,33 @@ def beam_search(prev_probs, k, input_third_LSTM, current_embed, h_prev_3, beam_s
 
     return top_value, top_index, h_prev_3, state_3, stack_current_embed
 
-def get_video_data_HL(video_data_path, video_feat_path):
-    files = open(video_data_path)
-    List = []
-    for ele in files:
-        List.append(ele[:-1])
-    return np.array(List)
-
-def get_video_data_jukin(video_data_path_train, video_data_path_val, video_data_path_test):
-    video_list_train = get_video_data_HL(video_data_path_train, video_feat_path)
-    train_title = []
-    title = []
-    fname = []
-    for ele in video_list_train:
-        batch_data = h5py.File(ele)
-        batch_fname = batch_data['fname']
-        batch_title = batch_data['title']
-        for i in xrange(len(batch_fname)):
-                fname.append(batch_fname[i])
-                title.append(batch_title[i])
-                train_title.append(batch_title[i])
-
-    video_list_val = get_video_data_HL(video_data_path_val, video_feat_path)
-    video_list_test = get_video_data_HL(video_data_path_test, video_feat_path)
-    train_title = np.array(train_title)
-    video_data = pd.DataFrame({'Description':train_title})
-
-    return video_data, video_list_train, video_list_val, video_list_test
+# def get_video_data_HL(video_data_path, video_feat_path):
+#     files = open(video_data_path)
+#     List = []
+#     for ele in files:
+#         List.append(ele[:-1])
+#     return np.array(List)
+#
+# def get_video_data_jukin(video_data_path_train, video_data_path_val, video_data_path_test):
+#     video_list_train = get_video_data_HL(video_data_path_train, video_feat_path)
+#     train_title = []
+#     title = []
+#     fname = []
+#     for ele in video_list_train:
+#         batch_data = h5py.File(ele)
+#         batch_fname = batch_data['fname']
+#         batch_title = batch_data['title']
+#         for i in xrange(len(batch_fname)):
+#                 fname.append(batch_fname[i])
+#                 title.append(batch_title[i])
+#                 train_title.append(batch_title[i])
+#
+#     video_list_val = get_video_data_HL(video_data_path_val, video_feat_path)
+#     video_list_test = get_video_data_HL(video_data_path_test, video_feat_path)
+#     train_title = np.array(train_title)
+#     video_data = pd.DataFrame({'Description':train_title})
+#
+#     return video_data, video_list_train, video_list_val, video_list_test
 
 def preProBuildWordVocab(sentence_iterator, word_count_threshold=5): # borrowed this function from NeuralTalk
     print 'preprocessing word counts and creating vocab based on word count threshold %d' % (word_count_threshold, )
@@ -261,7 +359,7 @@ def testing_one_batch(sess, video_feat_path, ixtoword, video_tf, video_mask_tf, 
 
     video_feat = np.zeros((batch_size, n_total_frames, dim_image))
     video_mask = np.zeros((batch_size, n_total_frames))
-    
+
     for ind in xrange(batch_size):
         if test_data_batch['fname'].shape[0]!=batch_size:
             if ind>=test_data_batch['fname'].shape[0]:
@@ -333,7 +431,7 @@ def testing_all_batch(sess, test_data, ixtoword, video_tf, video_mask_tf, captio
             new_IDs_list.append(str(k))
             pred_dict[str(k)] = v
     return pred_sent, gt_sent, new_IDs_list, gt_dict, pred_dict
-    
+
 def get_nb_params_shape(shape):
     '''
     Computes the total number of params for a given shap.
@@ -343,14 +441,15 @@ def get_nb_params_shape(shape):
     for dim in shape:
         nb_params = nb_params*int(dim)
     return nb_params
-   
+
 def train():
+    print "Loading vector representation of input sentences"
+    data, seq_ids, ins_ids, bucket_ids = load_data(gConfig['vec_file'], gConfig['info_file'], buckets)
+
+    pdb.set_trace()
+
     meta_data, train_data, val_data, test_data = get_video_data_jukin(video_data_path_train, video_data_path_val, video_data_path_test)
-    # captions = meta_data['Description'].values
-    # wordtoix, ixtoword, bias_init_vector = preProBuildWordVocab(captions, word_count_threshold=1)
-    # np.save('./data0/ixtoword', ixtoword)
-    # ixtoword=pd.Series(np.load('./data0/ixtoword-resnet-fixed-nochange.npy').tolist())
-    # ixtoword=pd.Series(np.load('./data0/ixtoword-msvd-PTBtokenizer-nochange.npy').tolist())
+
     wordtoix=pd.Series(np.load('./data0/wordtoix-msvd-PTBtokenizer-nochange.npy').tolist())
 
     current_feats = np.zeros((batch_size, n_total_frames, dim_image))
@@ -368,7 +467,7 @@ def train():
             bias_init_vector=None)
     print "Finish graph construction"
     tf_loss, tf_video, tf_video_mask, tf_caption, tf_caption_mask, tf_summary = model.build_model()
-   
+
     sess = tf.InteractiveSession(config=tf.ConfigProto(allow_soft_placement=True))
     print "Finish session initialization"
     with tf.device("/cpu:0"):
@@ -381,7 +480,7 @@ def train():
     print "Finish gradients clipping setup"
     tf.global_variables_initializer().run()
     writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
-    
+
     tStart_total = time.time()
     time_monitor = []
     for epoch in range(n_epochs):
@@ -475,22 +574,29 @@ def test(model_path='models/model-900', video_feat_path=video_feat_path):
     timetest = "Total Test Time Cost:" + str(round(tStop - tStart,2)) + "s"+ "\n"
     with open('./monitor_time/'+TODAY+'FRAME_LENGTH'+str(n_total_frames)+'-'.join(list_experiments)+'.timetest','a') as f:
         f.write(timetest)
-    
+
     np.savez('/home/dp1248/result-'+TODAY+'_'+model_path.split('/')[1]+'_'.join(list_experiments),gt = gt_sent,pred=pred_sent)
     scorer = COCOScorer()
     total_score = scorer.score(gt_dict, pred_dict, id_list)
     return total_score
 
 if __name__ == '__main__':
-    args = parse_args()    
-    if args.epochs != None:
-        n_epochs = args.epochs
-        
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
-    if args.task == 'train':
-        with tf.device('/gpu:'+str(gpu_id)):
-            train()
-    elif args.task == 'test':
-        with tf.device('/gpu:'+str(gpu_id)):
-            total_score = test(model_path = args.model)
+
+    if len(sys.argv) - 1:
+        gConfig = get_config(sys.argv[1])
+    else:
+        gConfig = get_config()
+
+    if not os.path.exists(gConfig['model_path']):
+        os.makedirs(gConfig['model_path'])
+    if not os.path.exists(gConfig['log_path']):
+        os.makedirs(gConfig['log_path'])
+
+    print('\n>> Mode : %s\n' %(gConfig['mode']))
+
+    if gConfig['mode'] == 'train':
+        train()
+    elif gConfig['mode'] == 'test':
+        total_score = test(model_path = args.model)
+    else:
+        print('%s mode not vailable. Mode options: train or test.' %(gConfig['mode']))

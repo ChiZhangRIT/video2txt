@@ -6,9 +6,9 @@ list_experiments = ['HRNE','SoftAttention', 'varlength']
 video_data_path_train = '/home/dp1248/h5_125_resnet_corr/train_val_100.txt'
 video_data_path_val = '/home/dp1248/h5_125_resnet_corr/val100.txt'
 video_data_path_test = '/home/dp1248/h5_125_resnet_corr/test100.txt'
-video_feat_path = '/home/PaulChen/h5py_data/cont_augment/' 
+video_feat_path = '/home/PaulChen/h5py_data/cont_augment/'
 
-gpu_id = 0
+# gpu_id = 3
 dim_image = 2048
 dim_hidden_gaussian= 256
 n_frame_step = 50 # total number of sampled frames
@@ -35,5 +35,5 @@ beam_size = 5
 pi = tf.cast(3.141592653589793, tf.float32)
 epsilon = tf.cast(np.finfo(float).eps, tf.float32)
 
-model_path = '/home/dp1248/git/SA-tensorflow/models-HRNE-'+'-'+'FRAME_LENGTH'+str(n_total_frames)+'-'+'-'.join(list_experiments)
-logs_path = '/home/dp1248/logs/HRNE-Gaussians-'+'-'+'FRAME_LENGTH'+str(n_total_frames)+'-'+'-'.join(list_experiments) 
+model_path = 'model/'
+logs_path = 'log/'
