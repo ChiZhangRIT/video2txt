@@ -24,4 +24,7 @@ plt.hist(np.asarray(num_sent), bins=len(num_sent))
 plt.xlabel('num_sent');
 plt.ylabel('count');
 plt.title('Histogram of number of sentences');
+# plt.savefig('histogram.png')
 plt.show()
+
+

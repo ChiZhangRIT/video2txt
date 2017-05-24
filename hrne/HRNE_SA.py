@@ -6,12 +6,14 @@ import os, h5py, sys, argparse
 import pdb
 import time
 import json
+import pickle as pkl
 from tqdm import *
 from collections import defaultdict
 from tensorflow.python.ops import rnn, rnn_cell
 from keras.preprocessing import sequence
 from cocoeval import COCOScorer
 from variables import *
+from data_utils import *
 import unicodedata
 # import Videocaption
 from Videocaption import Video_Caption_Generator
@@ -21,7 +23,7 @@ try:
 except:
     from configparser import SafeConfigParser # In Python 3, ConfigParser has been renamed to configparser for PEP 8 compliance.
 
-# use a number of buckets and pad to the closest one for efficiency.
+# use a number of buckets and pad to the closest one for efficiency. Once buckets are changed, the training process need to put samples into buckets again. Run helper/num_sent_tacos.py to plot histogram of lengths of sentences, if needed.
 buckets = [20, 40]
 
 gConfig = {}
@@ -36,117 +38,119 @@ def get_config(config_file='arguments.ini'):
                         for name in parser.options('booleans') ]
     return dict(_conf_ints + _conf_floats + _conf_strings + _conf_booleans)
 
-def bucketing(vec_count, buckets, vec_dim, curr_sample):
-    ''' throw a sample into corresponding bucket.
+# def bucketing(vec_count, buckets, vec_dim, curr_sample):
+#     ''' throw a sample into corresponding bucket.
+#
+#     Args:
+#     vec_count: count the number of vectors in current sample.
+#     vec_dim: dimension of sentence vectors.
+#     curr_sample: current sample, must be an numpy array.
+#
+#     Returns:
+#     bucket_id: id of bucket for current sample.
+#     curr_sample: updated current sample.
+#     '''
+#     try:
+#         bucket_id = min([i for i in xrange(len(buckets))
+#                          if vec_count <= buckets[i]])
+#         # padding 0 vectors if num of sentences is less than current bucket
+#         num_pad = buckets[bucket_id] - vec_count
+#         pad = np.zeros((num_pad, vec_dim))
+#         curr_sample = np.vstack((curr_sample, pad))  # shape (buckets[bucket_id], vec_dim)
+#     except:
+#         bucket_id = len(buckets) - 1
+#         # chop off extra sentences
+#         curr_sample = curr_sample[:buckets[-1], :]
+#     return bucket_id, curr_sample
+#
+# def load_data(vec_file, info_file, buckets):
+#     """ load data into buckets.
+#
+#     Args:
+#     vec_file: a numpy file containing the vector representation of sentences.
+#     info_file: an infomation file specifying the sequence and instance ids of
+#                the sentences in vec_file.
+#     buckets: bucket list dealing with variation of number of sentences. If buckets are not changed during training, this function is called only once.
+#
+#     Returns:
+#     data: a dict of buckets (as lists) of encoder inputs. data[bucket_id] has shape of (num_sample_in_this_bucket, bucket[bucket_id], vec_dim)
+#     seq_ids: a dict of buckets (as lists) of sequence ids.
+#     ins_ids: a dict of buckets (as lists) of sequence ids.
+#
+#     Raises:
+#     ValueError: if length of seq id and ins id are not identical.
+#     ValueError: if vec_file does not correspond to info_file.
+#     """
+#     vectors = np.load(vec_file)
+#     with open(info_file, 'r') as f:
+#         info = json.load(f)
+#
+#     if len(info['sequence_id_list']) != len(info['instance_id_list']):
+#         raise ValueError('Invalid info file: len(info[''sequence_id_list'']) should be equal to len(info[''instance_id_list'']) but got %d != %d' % (len(info['sequence_id_list']), len(info['instance_id_list'])))
+#     if vectors.shape[0] != len(info['instance_id_list']):
+#         raise ValueError('Number of vectors and length of info list are not identical. %d != %d' % (len(info['sequence_id_list']), len(info['instance_id_list'])))
+#
+#     num_vec, vec_dim = vectors.shape
+#     prev_seq_id, prev_ins_id = None, None
+#     seq_ids = {i: [] for i in xrange(len(buckets))}
+#     ins_ids = {i: [] for i in xrange(len(buckets))}
+#     data = {i: [] for i in xrange(len(buckets))}
+#
+#     for vec_idx in tqdm(xrange(num_vec)):
+#         curr_seq_id, curr_ins_id = info['sequence_id_list'][vec_idx], info['instance_id_list'][vec_idx]
+#         if curr_seq_id != prev_seq_id or curr_ins_id != prev_ins_id:
+#             if prev_seq_id is not None:
+#                 bucket_id, curr_sample = bucketing(vec_count, buckets, vec_dim, curr_sample)
+#                 seq_ids[bucket_id].append(prev_seq_id)
+#                 ins_ids[bucket_id].append(prev_ins_id)
+#                 data[bucket_id].append(curr_sample)
+#             vec_count = 1
+#             curr_sample = vectors[vec_idx]
+#         else:
+#             vec_count += 1
+#             curr_sample = np.vstack((curr_sample, vectors[vec_idx]))
+#         prev_seq_id = curr_seq_id
+#         prev_ins_id = curr_ins_id
+#
+#     # throw the last sample into bucket
+#     bucket_id, curr_sample = bucketing(vec_count, buckets, vec_dim, curr_sample)
+#     seq_ids[bucket_id].append(prev_seq_id)
+#     ins_ids[bucket_id].append(prev_ins_id)
+#     data[bucket_id].append(curr_sample)
+#
+#     return data, seq_ids, ins_ids
 
-    Args:
-    vec_count: count the number of vectors in current sample.
-    vec_dim: dimension of sentence vectors.
-    curr_sample: current sample, must be an numpy array.
-
-    Returns:
-    bucket_id: id of bucket for current sample.
-    curr_sample: updated current sample.
-    '''
-    try:
-        bucket_id = min([i for i in xrange(len(buckets))
-                         if vec_count <= buckets[i]])
-        # padding 0 vectors if num of sentences is less than current bucket
-        num_pad = buckets[bucket_id] - vec_count
-        pad = np.zeros((num_pad, vec_dim))
-        curr_sample = np.vstack((curr_sample, pad))  # shape (buckets[bucket_id], vec_dim)
-    except:
-        bucket_id = len(buckets) - 1
-        # chop off extra sentences
-        curr_sample = curr_sample[:buckets[-1], :]
-    return bucket_id, curr_sample
-
-def load_data(vec_file, info_file, buckets):
-    """ load data into batches.
-
-    Args:
-    vec_file: a numpy file containing the vector representation of sentences.
-    info_file: an infomation file specifying the sequence and instance ids of
-               the sentences in vec_file.
-    buckets: bucket list dealing with variation of number of sentences.
-
-    Returns:
-    data: a dict of buckets (as lists) of encoder inputs. data[bucket_id] has shape of (num_sample_in_this_bucket, bucket[bucket_id], vec_dim)
-
-    Raises:
-    ValueError: if length of seq id and ins id are not identical.
-    ValueError: if vec_file does not correspond to info_file.
-    """
-    vectors = np.load(vec_file)
-    with open(info_file, 'r') as f:
-        info = json.load(f)
-
-    if len(info['sequence_id_list']) != len(info['instance_id_list']):
-        raise ValueError('Invalid info file: len(info[''sequence_id_list'']) should be equal to len(info[''instance_id_list'']) but got %d != %d' % (len(info['sequence_id_list']), len(info['instance_id_list'])))
-    if vectors.shape[0] != len(info['instance_id_list']):
-        raise ValueError('Number of vectors and length of info list are not identical. %d != %d' % (len(info['sequence_id_list']), len(info['instance_id_list'])))
-
-    num_vec, vec_dim = vectors.shape
-    seq_ids, ins_ids = [], []
-    bucket_ids = []
-    prev_seq_id, prev_ins_id = None, None
-    data = {i: [] for i in xrange(len(buckets))}
-
-    for vec_idx in tqdm(xrange(num_vec)):
-        curr_seq_id, curr_ins_id = info['sequence_id_list'][vec_idx], info['instance_id_list'][vec_idx]
-        if curr_seq_id != prev_seq_id or curr_ins_id != prev_ins_id:
-            seq_ids.append(curr_seq_id)
-            ins_ids.append(curr_ins_id)
-            if prev_seq_id is not None:
-                bucket_id, curr_sample = bucketing(vec_count, buckets, vec_dim, curr_sample)
-                bucket_ids.append(bucket_id)
-                data[bucket_id].append(curr_sample)
-            vec_count = 1
-            curr_sample = vectors[vec_idx]
-        else:
-            vec_count += 1
-            curr_sample = np.vstack((curr_sample, vectors[vec_idx]))
-        prev_seq_id = curr_seq_id
-        prev_ins_id = curr_ins_id
-
-    # throw the last sample into bucket
-    bucket_id, curr_sample = bucketing(vec_count, buckets, vec_dim, curr_sample)
-    bucket_ids.append(bucket_id)
-    data[bucket_id].append(curr_sample)
-
-    return data, seq_ids, ins_ids, bucket_ids
-
-def parse_args():
-    """
-    Parse input arguments
-    """
-    parser = argparse.ArgumentParser(description='Extract a CNN features')
-    # parser.add_argument('--gpu', dest='gpu_id', help='GPU id to use',
-    #                     default=0, type=int)
-    parser.add_argument('--net', dest='model',
-                        help='model to test',
-                        default=None, type=str)
-    parser.add_argument('--dataset', dest='dataset',
-                        help='dataset to extract',
-                        default='train_val', type=str)
-    parser.add_argument('--task', dest='task',
-                        help='train or test',
-                        default='train', type=str)
-    parser.add_argument('--epochs', dest='epochs',
-                        help='Int number',
-                        default=30, type=int)
-    parser.add_argument('--tg', dest='tg',
-                        help='target to be extract lstm feature',
-                        default='/home/Hao/tik/jukin/data/h5py', type=str)
-    parser.add_argument('--ft', dest='ft',
-                        help='choose which feature type would be extract',
-                        default='lstm1', type=str)
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
-
-    args = parser.parse_args()
-    return args
+# def parse_args():
+#     """
+#     Parse input arguments
+#     """
+#     parser = argparse.ArgumentParser(description='Extract a CNN features')
+#     # parser.add_argument('--gpu', dest='gpu_id', help='GPU id to use',
+#     #                     default=0, type=int)
+#     parser.add_argument('--net', dest='model',
+#                         help='model to test',
+#                         default=None, type=str)
+#     parser.add_argument('--dataset', dest='dataset',
+#                         help='dataset to extract',
+#                         default='train_val', type=str)
+#     parser.add_argument('--task', dest='task',
+#                         help='train or test',
+#                         default='train', type=str)
+#     parser.add_argument('--epochs', dest='epochs',
+#                         help='Int number',
+#                         default=30, type=int)
+#     parser.add_argument('--tg', dest='tg',
+#                         help='target to be extract lstm feature',
+#                         default='/home/Hao/tik/jukin/data/h5py', type=str)
+#     parser.add_argument('--ft', dest='ft',
+#                         help='choose which feature type would be extract',
+#                         default='lstm1', type=str)
+#     if len(sys.argv) == 1:
+#         parser.print_help()
+#         sys.exit(1)
+#
+#     args = parser.parse_args()
+#     return args
 
 def beam_search(prev_probs, k, input_third_LSTM, current_embed, h_prev_3, beam_size, *args):
     h_prev_3 = tf.transpose(h_prev_3)
@@ -443,12 +447,16 @@ def get_nb_params_shape(shape):
     return nb_params
 
 def train():
-    print "Loading vector representation of input sentences"
-    data, seq_ids, ins_ids, bucket_ids = load_data(gConfig['vec_file'], gConfig['info_file'], buckets)
+    # load training data
+    train_filename = 'data/tacos_train_' + '_'.join(str(i) for i in buckets) + '.pkl'
+    train_inputs, train_seq_ids, train_ins_ids = load_data(train_filename, buckets, gConfig['vec_file'], gConfig['vec_info_file'])
+    # load single sentence ground truths. Some entries in train_inputs, train_seq_ids, and train_ins_ids will be cleaned if there is no match in singlesentence gt.
+    train_inputs, train_seq_ids, train_ins_ids, train_ss_gt = correspond_gt(train_inputs, train_seq_ids, train_ins_ids, gConfig['singlesentence_file'], gConfig['singlesentence_info_file'], buckets, 'singlesentence')
 
+    print '\n'
     pdb.set_trace()
 
-    meta_data, train_data, val_data, test_data = get_video_data_jukin(video_data_path_train, video_data_path_val, video_data_path_test)
+    # meta_data, train_data, val_data, test_data = get_video_data_jukin(video_data_path_train, video_data_path_val, video_data_path_test)
 
     wordtoix=pd.Series(np.load('./data0/wordtoix-msvd-PTBtokenizer-nochange.npy').tolist())
 

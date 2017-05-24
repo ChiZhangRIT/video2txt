@@ -120,7 +120,7 @@ def create_model(session, forward_only):
       print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
       model.saver.restore(session, ckpt.model_checkpoint_path)
     #   print("Reading parameters from previous model ...")
-    #   model.saver.restore(session, "model/finetune_1024units_noatt/seq2seq.ckpt-100000")
+    #   model.saver.restore(session, "model/caption_300units_noatt_50kvocab/seq2seq.ckpt-100000")
 
   else:
       print("Created model with fresh parameters.")
