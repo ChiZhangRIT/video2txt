@@ -7,6 +7,8 @@ sent2sent/model/
 sent2sent/log_dir/
 !sent2sent/data/_toy_Dec.txt
 !sent2sent/data/_toy_Enc.txt
+!sent2sent/data/MSEparaphraseCorpus/*
+!sent2sent/data/SICK/*
 
 sent2vec/data/
 sent2vec/model/
