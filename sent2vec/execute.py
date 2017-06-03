@@ -269,6 +269,79 @@ def decode():
       sentence = sys.stdin.readline()
 
 
+class GlobalSip():
+    def __init__(self,conf='seq2seq.ini'):
+        # pdb.set_trace()
+        self.gConfig = self.get_config(conf)
+        self.sess = tf.Session()
+        self.model = self.create_model(self.sess, True)
+        self.model.batch_size = 1
+            # Load vocabularies.
+        enc_vocab_path = os.path.join(self.gConfig['working_directory'],"vocab%d.enc" % self.gConfig['enc_vocab_size'])
+        dec_vocab_path = os.path.join(self.gConfig['working_directory'],"vocab%d.dec" % self.gConfig['dec_vocab_size'])
+        self.enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
+        _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
+
+    def get_vector(self,sentence):
+        token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), self.enc_vocab)
+        # Which bucket does it belong to?
+        token_ids = token_ids[:60]
+        try:
+            bucket_id = min([b for b in xrange(len(_buckets))
+                             if _buckets[b][0] >= len(token_ids)])
+        except:
+            # if sentence length greater than the largest bucket size
+            pdb.set_trace()
+
+        # Get a 1-element batch to feed the sentence to the model.
+        encoder_inputs, decoder_inputs, target_weights = self.model.get_batch(
+          {bucket_id: [(token_ids, [])]}, bucket_id)
+        # pdb.set_trace()
+        # Get output logits for the sentence.
+        sent2vec = self.model.step(self.sess, encoder_inputs, decoder_inputs,
+                              target_weights, bucket_id, True)
+
+        return np.squeeze(sent2vec)
+    def get_config(self, config_file='seq2seq.ini'):
+
+        parser = SafeConfigParser()
+        parser.read(config_file)
+        # get the ints, floats and strings
+        _conf_ints = [ (key, int(value)) for key,value in parser.items('ints') ]
+        _conf_floats = [ (key, float(value)) for key,value in parser.items('floats') ]
+        _conf_strings = [ (key, str(value)) for key,value in parser.items('strings') ]
+        # _conf_booleans = [ (key, bool(value)) for key,value in parser.items('booleans') ]
+        _conf_booleans = [ (name, parser.getboolean('booleans', name))
+                            for name in parser.options('booleans') ]
+        return dict(_conf_ints + _conf_floats + _conf_strings + _conf_booleans)
+    def create_model(self, session, forward_only):
+
+      """Create model and initialize or load parameters"""
+      model = seq2seq_model.Seq2SeqModel( self.gConfig['enc_vocab_size'],
+                                          self.gConfig['dec_vocab_size'],
+                                          _buckets, self.gConfig['layer_size'],
+                                          self.gConfig['num_layers'],
+                                          self.gConfig['max_gradient_norm'],
+                                          self.gConfig['batch_size'],
+                                          self.gConfig['learning_rate'],
+                                          self.gConfig['learning_rate_decay_factor'],
+                                          forward_only=forward_only,
+                                          use_pretrained_embedding=self.gConfig['pretrained_embedding'],
+                                          pretrained_embedding_path=self.gConfig['pretrained_embedding_path'])
+
+      if 'pretrained_model' in gConfig:
+          model.saver.restore(session,self.gConfig['pretrained_model'])
+          return model
+
+      ckpt = tf.train.get_checkpoint_state(self.gConfig['model_directory'])
+      if ckpt and ckpt.model_checkpoint_path:
+        print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+        model.saver.restore(session, ckpt.model_checkpoint_path)
+      else:
+        print("Created model with fresh parameters.")
+        session.run(tf.global_variables_initializer())
+      return model
+
 def scorer():
   with tf.Session() as sess:
     # Create model and load parameters.
@@ -293,9 +366,10 @@ def scorer():
         # Get token-ids for the input sentence.
         token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), enc_vocab)
         # Which bucket does it belong to?
-        token_ids = token_ids[:40]
+        token_ids = token_ids[:60]
         try:
-            bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
+            bucket_id = min([b for b in xrange(len(_buckets))
+                             if _buckets[b][0] >= len(token_ids)])
         except:
             # if sentence length greater than the largest bucket size
             pdb.set_trace()
@@ -306,7 +380,7 @@ def scorer():
 
         # Get output logits for the sentence.
         sent2vec = model.step(sess, encoder_inputs, decoder_inputs,
-                                       target_weights, bucket_id, True)
+                              target_weights, bucket_id, True)
 
         # # save vector to dict
         # vectors[id_counter] = np.squeeze(sent2vec)

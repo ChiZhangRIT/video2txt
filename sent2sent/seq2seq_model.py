@@ -84,8 +84,8 @@ class Seq2SeqModel(object):
     self.learning_rate = tf.Variable(float(learning_rate), trainable=False)
     self.learning_rate_decay_op = self.learning_rate.assign(
         self.learning_rate * learning_rate_decay_factor)
-    # self.learning_rate_finetune_op = self.learning_rate.assign(
-    #     self.learning_rate * 0.01)  # for fine-tuning
+    self.learning_rate_finetune_op = self.learning_rate.assign(
+        self.learning_rate * 0.1)  # for fine-tuning
     self.global_step = tf.Variable(0, trainable=False)
     self.use_pretrained_embedding = use_pretrained_embedding
 

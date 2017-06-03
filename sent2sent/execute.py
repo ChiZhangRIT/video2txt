@@ -117,10 +117,10 @@ def create_model(session, forward_only):
 
   ckpt = tf.train.get_checkpoint_state(gConfig['model_directory'])
   if ckpt and ckpt.model_checkpoint_path:
-      print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-      model.saver.restore(session, ckpt.model_checkpoint_path)
-    #   print("Reading parameters from previous model ...")
-    #   model.saver.restore(session, "model/caption_300units_noatt_50kvocab/seq2seq.ckpt-100000")
+    #   print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+    #   model.saver.restore(session, ckpt.model_checkpoint_path)
+      print("Reading parameters from previous model ...")
+      model.saver.restore(session, "model/caption_300units_noatt_50kvocab/seq2seq.ckpt-625000")
 
   else:
       print("Created model with fresh parameters.")
@@ -206,10 +206,9 @@ def train():
       if current_step % gConfig['steps_per_checkpoint'] == 0 or current_step == 1:
         # Print statistics for the previous epoch.
         if current_step == 1:
-            # change learning rate in fine-tuning
-            # sess.run(model.learning_rate.assign(
-            #     tf.Variable(float(0.0005), trainable=False)))
+            # change learning rate in fine-tuning (uncomment next line for fine-tuning)
             # sess.run(model.learning_rate_finetune_op)
+            # sess.run(model.learning_rate.assign(tf.Variable(float(0.0005), trainable=False)))
             perplexity = math.exp(step_loss) if step_loss < 300 else float('inf')
             print ("global step %d learning rate %.4f loss %.4f perplexity %.2f"
                 % (model.global_step.eval(), model.learning_rate.eval(),

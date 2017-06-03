@@ -171,7 +171,7 @@ def correspond_gt(encoder_inputs, seq_ids, ins_ids, gt_sent_file, gt_info_file, 
         print "Extracting and formatting ground truth sentences..."
         gt = {i: [] for i in xrange(len(buckets))}
         for bucket_id in trange(len(buckets), desc='  buckets'):
-            for i in trange(len(seq_ids[bucket_id]), desc='sentences'):
+            for i in reversed(trange(len(seq_ids[bucket_id]), desc='sentences')):
                 detailed_seq_id = seq_ids[bucket_id][i]
                 detailed_ins_id = ins_ids[bucket_id][i]
                 seq_inds = [j for j, x in enumerate(ss_seq_ids) if x == detailed_seq_id]

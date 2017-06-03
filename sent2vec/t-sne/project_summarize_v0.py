@@ -8,10 +8,12 @@ import matplotlib.pyplot as plt
 import pdb
 
 # directory of saving output images. If show image, set to None.
-dir_save_im = 'tsne_skipthought.png'
-# path to tacos descriptions
-short_desc_path = '../data/skipthought/tacos_short_test_vec_encoder.np'
-short_info_path = '../sentences/tacos_short_info_test.json'
+dir_save_im = None  # or 'tsne_skipthought.png'
+# path to tacos descriptions - short can be "short" or "detailed" depending on what you want to plot.
+# short_desc_path = '../data/skipthought/tacos_short_test_vec_encoder.np'
+# short_info_path = '../sentences/tacos_short_info_test.json'
+short_desc_path = '../data/skipthought/tacos_detailed_test_vec_encoder.np'
+short_info_path = '../sentences/tacos_detailed_info_test.json'
 sinsent_desc_path = '../data/skipthought/tacos_singlesentence_test_vec_encoder.np'
 sinsent_info_path = '../sentences/tacos_singlesentence_info_test.json'
 
@@ -20,7 +22,7 @@ def build_tacos(short_src,
                 sinsent_src,
                 short_info_path,
                 sinsent_info_path,
-                sample_idx=range(1, 51)):
+                sample_idx=range(1, 8)):
     short_data = np.load(short_src)
     sinsent_data = np.load(sinsent_src)
     with open(short_info_path, 'r') as f:
@@ -46,8 +48,16 @@ def build_tacos(short_src,
         ind = list(set(seq_inds) & set(ins_inds))
         short = list(short_data[ind, :])
 
+        # output: single sentence followed by short description
+        # [ss_0, short_0_0, short_0_1, ..., ss_1, short_1_0, short_1_1, ...]
         mat += ([ss] + short)
         mask += [i] * (len(short) + 1)
+
+        # # output: short description without single sentence
+        # # [short_0_0, short_0_1, ..., short_1_0, short_1_1, ...]
+        # mat += short
+        # mask += [i] * len(short)
+
     # pdb.set_trace()
     return (mat, mask)
 
@@ -92,11 +102,11 @@ def tsne_viz(
     for _s, _marker, _c, _x, _y in zip(marker_sizes, markers, colors, xvals, yvals):
         ax.scatter(_x, _y, s=_s, c=_c, marker=_marker)
 
-    # if output_filename:
-    plt.savefig(output_filename, bbox_inches='tight')
-    print "Image saved."
-    # else:
-    plt.show()
+    if output_filename:
+        plt.savefig(output_filename, bbox_inches='tight')
+        print "Image saved."
+    else:
+        plt.show()
 
 
 if __name__ == "__main__":

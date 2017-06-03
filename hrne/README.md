@@ -12,7 +12,7 @@ python HRNE_SA.py
 ```
 Note: To assgin GPU devices, use
 ```
-export CUDA_VISIBLE_DEVICES="3"
+export CUDA_VISIBLE_DEVICES="0,1"
 ```
 
 ### Evaluation

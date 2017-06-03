@@ -31,3 +31,6 @@ hrne/model/
 hrne/sentences/
 hrne/skipthought/
 hrne/tacos/
+
+ba_captioning/
+nyt_corpus/
