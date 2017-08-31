@@ -34,3 +34,7 @@ hrne/tacos/
 
 ba_captioning/
 nyt_corpus/
+
+skip-thoughts/models/
+
+data/

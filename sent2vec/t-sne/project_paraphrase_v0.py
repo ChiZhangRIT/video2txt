@@ -92,8 +92,8 @@ word = [str(i) for i in num_pairs]
 enc_word = [enc_sent[i] for i in num_pairs]
 dec_word = [dec_sent[i] for i in num_pairs]
 # pdb.set_trace()
-enc_word = [str(i)+'A' for i in range(7)]
-dec_word = [str(i)+'B' for i in range(7)]
+# enc_word = [str(i)+'A' for i in range(7)]
+# dec_word = [str(i)+'B' for i in range(7)]
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
