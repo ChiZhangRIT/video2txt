@@ -281,6 +281,59 @@ def decode():
       sentence = sys.stdin.readline()
 
 
+def multi_test():
+    """generate paraphrasing sentences for multiple input sentences."""
+    with tf.Session() as sess:
+        # Create model and load parameters.
+        model = create_model(sess, True)
+        model.batch_size = 1  # We decode one sentence at a time.
+
+        # Load vocabularies.
+        enc_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.enc" % gConfig['enc_vocab_size'])
+        dec_vocab_path = os.path.join(gConfig['working_directory'],"vocab%d.dec" % gConfig['dec_vocab_size'])
+
+        enc_vocab, _ = data_utils.initialize_vocabulary(enc_vocab_path)
+        _, rev_dec_vocab = data_utils.initialize_vocabulary(dec_vocab_path)
+
+        # test_file = os.path.join(gConfig['encoder_test_file'])
+        test_dir = 'data/top5/'
+        output_dir = 'data/top5/'
+        # test_captions = open(test_file,'r').readlines()
+        for filename in os.listdir(test_dir):
+            if filename.endswith(".txt"):
+                test_captions = open(test_dir + filename,'r').readlines()
+
+                output_captions = []
+                for sentence in test_captions:
+                    # Get token-ids for the input sentence.
+                    token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence.lower()), enc_vocab)
+                    # Which bucket does it belong to?
+                    token_ids = token_ids[:40]
+                    try:
+                      bucket_id = min([b for b in xrange(len(_buckets)) if _buckets[b][0] >= len(token_ids)])
+                    except:
+                      # if sentence length greater than the largest bucket size
+                      pdb.set_trace()
+                    # Get a 1-element batch to feed the sentence to the model.
+                    encoder_inputs, decoder_inputs, target_weights = model.get_batch(
+                        {bucket_id: [(token_ids, [])]}, bucket_id)
+                    # Get output logits for the sentence.
+                    _, _, output_logits = model.step(sess, encoder_inputs, decoder_inputs,
+                                                     target_weights, bucket_id, True)
+                    # This is a greedy decoder - outputs are just argmaxes of output_logits.
+                    outputs = [int(np.argmax(logit, axis=1)) for logit in output_logits]
+                    # If there is an EOS symbol in outputs, cut them at that point.
+                    if data_utils.EOS_ID in outputs:
+                      outputs = outputs[:outputs.index(data_utils.EOS_ID)]
+                    # Print out French sentence corresponding to outputs.
+                    output_caption = " ".join([tf.compat.as_str(rev_dec_vocab[output]) for output in outputs])
+                    output_captions.append(output_caption)
+
+                with open(output_dir + 'paraphrase_' + filename, 'w') as f:
+                    for item in output_captions:
+                        f.write("%s\n" % item)
+
+
 def scorer():
   with tf.Session() as sess:
     # Create model and load parameters.
@@ -419,6 +472,8 @@ if __name__ == '__main__':
         decode()
     elif gConfig['mode'] == 'eval':
         scorer()
+    elif gConfig['mode'] == 'generate':
+        multi_test()
     else:
         # wrong way to execute "serve"
         #   Use : >> python ui/app.py

@@ -40,7 +40,8 @@ python execute.py
 
 ### Inference
 
-Edit *seq2seq.ini* file to set *mode = test*
+Edit *seq2seq.ini* file to set *mode = test*.
+Edit *seq2seq.ini* file to set *mode = generate* to generate paraphrasing sentences, given a file containing multiple input sentences.
 ```
 python execute.py
 ```
