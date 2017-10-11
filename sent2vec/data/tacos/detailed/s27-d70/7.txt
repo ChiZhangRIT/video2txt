@@ -1,0 +1,16 @@
+the person entered the kitchen
+the person opened the refrigerator
+the person took out an orange
+the person opened the drawer
+the person got a cutting board and knife
+the person cut the orange in half with the knife
+the person got a juicer from the drawer
+the person juiced both halves of the orange
+the person got a spoon from the drawer
+the person threw away the orange skin
+the person spooned the pulp into the trash
+the person got a glass from the cabinet
+the person poured the juice from the juicer into the glass
+the person got sugar from the pantry
+the person stirred a spoon of sugar into the juice
+the person put the sugar away

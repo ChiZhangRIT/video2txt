@@ -1,0 +1,12 @@
+the person walked into the kitchen
+the person took a cutting board out of the drawer
+the person took a knife out of the drawer
+the person took bulb of ginger out of the cabinet
+the person took a plate out of the cabinet
+the person washed a plate
+the person cut a piece off the ginger
+the person returned the larger piece to the cabinet
+the person washed the smaller piece of ginger
+the person sliced the ginger on the cutting board
+the person put the slices on the plate
+the person threw the debris into the garbage pail

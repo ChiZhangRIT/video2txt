@@ -1,0 +1,21 @@
+the person entered the kitchen
+the person opened the cabinet
+the person got a bowl
+the person opened the refrigerator
+the person removed two eggs
+the person got a fork from the drawer
+the person broke both eggs
+the person put both eggs in the bowl
+the person added some spices to the eggs
+the person used the fork to mix the eggs
+the person turned on the stove
+the person got a pan
+the person added some oil to the pan
+the person got a spatula from the drawer
+the person put a spatula back
+the person put the egg in the pan
+the egg cooked
+the person washed the bowl
+the person got the spatula again
+the person put the scrambled eggs in the bowl
+the person cleaned up

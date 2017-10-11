@@ -1,0 +1,14 @@
+the person opened a cabinet
+the person grabbed a loaf of bread
+the person placed the bread on the counter
+the person grabbed a plate
+the person placed two slices of bread on the plate
+the person plugged a toaster in
+the person place the two slices of bread in the toaster
+the person placed the loaf of bread back
+the person paced
+the person waited for the toaster to finish
+the person unplugged the toaster
+the person grabbed the finished toast
+the person plated the toast
+the person walked away

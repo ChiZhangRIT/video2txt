@@ -1,0 +1,14 @@
+the person walked into the kitchen
+the person got a loaf of bread from the fridge
+the person placed a loaf of bread on the counter
+the person went to the cupboard
+the person got a plate
+the person put the plate on the counter
+the person got a cutting board and knife from below the counter
+the person washed his hands in the sink
+the person dried his hands in the sink
+the person took the bread out of the wrapper
+the person used the knife to cut two slices of bread
+the person put the slices of bread on the plate
+the person put the bread back in the wrapper
+the person wiped the crumbs from the cutting board into the garbage

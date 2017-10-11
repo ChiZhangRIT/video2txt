@@ -1,0 +1,13 @@
+the person entered the kitchen
+the person took a cutting board and a bread knife from a drawer
+the person took a loaf of bread from the refrigerator
+the person placed a loaf of bread on the cutting board
+the person used the knife to slice two slices from the loaf
+the person returned the bread to the refrigerator
+the person retrieved a plate from a cupboard
+the person placed the two pieces of sliced bread on the plate
+the person rinsed off the knife
+the person returned the knife to its drawer
+the person wiped off the counter
+the person disposed of the crumbs on the cutting board
+the person returned the cutting board to the drawer

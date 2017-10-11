@@ -1,6 +1,6 @@
 ## Sentence-to-sentence Model
 
-This work is based on easy_seq2seq. Original code can be found here: https://github.com/suriyadeepan/easy_seq2seq
+This work is based on easy_seq2seq. Original code can be found [here](https://github.com/suriyadeepan/easy_seq2seq).
 
 ### Data preparation
 
@@ -18,16 +18,30 @@ Note that some characters in the original data is not in the right codec. We are
 
 All sentences pairs were extracted from MSCOCO + Flickr30k + MSR-VTT + MSVD.
 
+
 ### Training
 
-Edit *seq2seq.ini* file to set *mode = train*
+Edit *seq2seq.ini* file to set *mode = train*. To use pre-trained embedding, set *pretrained_embedding = true*
+```
+python execute.py
+```
+Note: Set *trainable=True* in *embedding = vs.get_variable(...)* (line 762) in *embedding/rnn_cell.py* to enable training on pre-trained embedding.
+Note: To assgin a GPU device, use
+```
+export CUDA_VISIBLE_DEVICES="0"
+```
+
+### Evaluation
+
+Edit *seq2seq.ini* file to set *mode = eval*
 ```
 python execute.py
 ```
 
-### inference
+### Inference
 
-Edit *seq2seq.ini* file to set *mode = test*
+Edit *seq2seq.ini* file to set *mode = test*.
+Edit *seq2seq.ini* file to set *mode = generate* to generate paraphrasing sentences, given a file containing multiple input sentences.
 ```
 python execute.py
 ```

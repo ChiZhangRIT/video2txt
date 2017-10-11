@@ -1,0 +1,16 @@
+the person entered the kitchen
+the person opened a drawer
+the person selected two utensils
+the person put two utensils on the counter
+the person walked to the refrigerator
+the person got out a cucumber
+the person took the cucumber to the counter
+the person got out a cutting board
+the person began peeling the cucumber
+the person cut up the cucumber on the cutting board by slicing the cucumber lengthwise
+the person cut the cucumber in slices
+the person went to the cabinet
+the person got out a plate
+the person carried the plate to the counter
+the person picked up the cutting board
+with the knife , the person scraped the cucumber onto the plate

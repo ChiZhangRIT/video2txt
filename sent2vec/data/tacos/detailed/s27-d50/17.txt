@@ -1,0 +1,10 @@
+the person entered the kitchen
+the person took out a glass from the cabinet
+the person placed a glass on the counter
+the person took out a smaller glass from the cabinet
+the person placed a smaller glass to the previous on the counter
+the person opened the fridge
+the person took out an egg
+the person walked back to the counter ,
+carefully cracked open the egg ,
+the person separated the yoke and the white into different glasses

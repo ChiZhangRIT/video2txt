@@ -1,0 +1,18 @@
+the person entered a kitchen
+the person placed a knife and wooden cutting board on the counter top
+the person picked some herbs from a plant
+the person placed the herbs on the cutting board
+the person used the knife to cut the herbs
+the person pushed the herbs together
+the person finely chopped the herbs with the knife
+the person organized the chopped herbs into a pile on the center of the cutting board
+the person walked to a cabinet
+the person opened a cabinet
+the person closed a cabinet removing nothing
+the person opened the cabinet to the cabinet
+the person removed a plate
+the person returned to the counter
+the person moved the herbs from the cutting board to the plate
+the person rinsed the knife
+the person dried the knife
+the person placed the knife on the cutting board

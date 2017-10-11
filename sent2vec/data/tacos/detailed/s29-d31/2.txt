@@ -1,0 +1,9 @@
+the person entered a kitchen
+the person removed a knife and cutting board from a drawer
+the person placed a knife and cutting board on the counter
+the person gathered a clove of garlic from a cupboard
+the person removed the outer skin from the garlic clove
+the person placed the piece of garlic on the cutting board
+the person cut the piece of garlic horizontally and vertically with the knife
+the person cut the piece of garlic into small squares
+the person looked towards someone off-camera

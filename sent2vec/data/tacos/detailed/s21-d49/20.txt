@@ -1,0 +1,23 @@
+the person entered the kitchen
+the person gathered a pot from a cupboard
+the person filled the pot with water
+the person poured some water into a pot
+the person placed the pot on the stove
+the person placed a pot on a stove
+the person turned the stove burner on
+the person turned on the stove
+the person gathered a bag of pasta from the cupboard
+the person gathered a jar of oil and a jar of tomato sauce from the cupboard
+the person returned the tomato sauce to the cupboard
+the person placed some oil into the pot
+the person pulled a strainer from the drawer
+the person placed pasta into the pot of water
+the person placed some pasta into the pot
+the person gathered a plate and fork
+the person placed a plate and fork on the counter
+the person stirred the pasta with a wooden spatula
+the person poured the pasta into the strainer
+the person strained the cooked pasta
+the person rinsed the pasta
+the person placed the strained pasta into a bowl
+the person placed the cooked pasta on a plate

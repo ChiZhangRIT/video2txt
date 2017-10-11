@@ -1,0 +1,12 @@
+the person entered the kitchen
+the person opened a drawer
+the person took out a cutting board
+the person opened a cabinet
+the person took out a bowl and plate
+the person grabbed a vegetable from the refrigerator
+the person took a peeler from a drawer
+the person peeled the vegetable
+the person took a knife out of the drawer
+the person cut the stem end off
+the person cut the vegetable on the cutting board
+the person placed the pieces on the plate

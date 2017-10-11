@@ -1,0 +1,17 @@
+the person entered the kitchen
+the person removed an orange from the refrigerator
+the person placed the orange on the counter
+the person removed a cutting board and a knife from a drawer
+the person cut the orange in half
+the person retrieved a hand juicer from a drawer
+the person worked one orange half over the hand juicer
+the person repeated the process with the other half of orange
+the person took a spoon from a drawer
+the person discarded the orange peel
+the person used the spoon to discard the orange pulp from the hand juicer
+the person took a glass from a cupboard
+the person poured the juice from the juicer into a glass
+the person took a bag of sugar from a cupboard
+the person took a tablespoon of sugar
+the person stirred a tablespoon of sugar into the orange juice
+the person returned the sugar to the cupboard

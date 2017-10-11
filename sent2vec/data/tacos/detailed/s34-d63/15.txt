@@ -1,0 +1,11 @@
+the person walked into the kitchen
+the person opened a drawer
+the person grabbed a toaster
+the person took the bread from the fridge
+the person placed the bread in the toaster
+the person plugged in the toaster
+the person took the plate out of the cabinet
+the person washed the plate
+the person dried the plate
+the person placed the toast on the plate
+the person unplugged the toaster

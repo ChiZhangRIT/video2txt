@@ -1,0 +1,19 @@
+the person entered the room
+the person opened the drawer
+the person took a trencher
+the person opened another drawer
+the person took a knife
+the person took a knife
+the person opened the closet
+the person took a medium sized plate
+the person opened another closet
+the person took a red pepper
+the person went to the sink
+the person washed the red pepper
+the person pulled out the stalk of the pepper
+the person threw the stalk of the pepper away
+the person washed the interior of the red pepper
+the person put the pepper on the trencher
+the person dried his hands on a towel
+the person sliced the pepper
+the person put the slices on the plate

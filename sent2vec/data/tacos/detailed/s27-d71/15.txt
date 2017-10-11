@@ -1,0 +1,17 @@
+the person entered the kitchen
+the person took a pot from a drawer
+the person filled the pot with water
+the person placed the water-filled pot on the stove
+the person turned the stove on
+the person placed the cover on the pot
+the person took ketchup , mustard , and hot dogs from the refrigerator
+the person took a cutting board from a drawer
+the person gathered hot dog buns , bacon , and cheese from the cupboard
+the person placed two hot dogs in the pot of water
+the person sliced two hot dog buns with a knife
+the person placed cheese inside the hot dog buns
+the person also placed some bacon on the buns
+the person added ketchup and mustard to the hot dog buns
+the person took a plate from the cupboard
+the person placed the buns on a plate
+the person placed the cooked hot dogs on the buns

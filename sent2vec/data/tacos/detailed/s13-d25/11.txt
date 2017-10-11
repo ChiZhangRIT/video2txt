@@ -1,0 +1,12 @@
+the person entered the kitchen
+the person took out a package of bread from the cupboard
+the person brought a plate from the cabinet
+the person placed a plate on the counter
+the person opened the bread package
+the person took a knife from the drawer
+the person started to cut a slice
+the person took a cutting board from the drawer
+the person placed the loaf on the cutting board
+the person cut two slices of bread
+the person placed the two slices on the plate
+the person wrapped the remaining loaf

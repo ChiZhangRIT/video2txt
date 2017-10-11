@@ -50,7 +50,8 @@ class Seq2SeqModel(object):
                learning_rate_decay_factor, use_lstm=False,
                num_samples=512, forward_only=False,
                use_pretrained_embedding=False,
-               pretrained_embedding_path=None):
+               pretrained_embedding_path=None,
+               pretrained_projection_path=None):
     """Create the model.
 
     Args:
@@ -72,6 +73,9 @@ class Seq2SeqModel(object):
       use_lstm: if true, we use LSTM cells instead of GRU cells.
       num_samples: number of samples for sampled softmax.
       forward_only: if set, we do not construct the backward pass in the model.
+      use_pretrained_embedding: if true, use GloVe embedding.
+      pretrained_embedding_path: path to GloVe embedding,
+      pretrained_projection_path: path to projection matrix in decoder. (deprecated)
     """
     self.source_vocab_size = source_vocab_size
     self.target_vocab_size = target_vocab_size
@@ -80,6 +84,8 @@ class Seq2SeqModel(object):
     self.learning_rate = tf.Variable(float(learning_rate), trainable=False)
     self.learning_rate_decay_op = self.learning_rate.assign(
         self.learning_rate * learning_rate_decay_factor)
+    self.learning_rate_finetune_op = self.learning_rate.assign(
+        self.learning_rate * 0.1)  # for fine-tuning
     self.global_step = tf.Variable(0, trainable=False)
     self.use_pretrained_embedding = use_pretrained_embedding
 
@@ -88,16 +94,27 @@ class Seq2SeqModel(object):
     softmax_loss_function = None
     # Sampled softmax only makes sense if we sample less than vocabulary size.
     if num_samples > 0 and num_samples < self.target_vocab_size:
-      w = tf.get_variable("proj_w", [size, self.target_vocab_size])
-      w_t = tf.transpose(w)
-      b = tf.get_variable("proj_b", [self.target_vocab_size])
-      output_projection = (w, b)
+        # if not self.use_pretrained_embedding:
+        if False:  # turned out that GloVe proj make performance worse
+            # train projection from scratch
+            w = tf.get_variable("proj_w", [size, self.target_vocab_size])
+            w_t = tf.transpose(w)
+            b = tf.get_variable("proj_b", [self.target_vocab_size])
+        else:
+            # projection using GloVe transposed
+            w_init = tf.constant(np.load(pretrained_embedding_path))
+            w_glove = tf.get_variable("proj_w", initializer=w_init, trainable=True)
+            w = tf.transpose(w_glove)
+            w_t = tf.transpose(w)
+            b_init = tf.zeros([self.target_vocab_size])
+            b = tf.get_variable("proj_b", initializer=b_init, trainable=True)
+        output_projection = (w, b)
 
-      def sampled_loss(inputs, labels):
-        labels = tf.reshape(labels, [-1, 1])
-        return tf.nn.sampled_softmax_loss(w_t, b, inputs, labels, num_samples,
+        def sampled_loss(inputs, labels):
+            labels = tf.reshape(labels, [-1, 1])
+            return tf.nn.sampled_softmax_loss(w_t, b, inputs, labels, num_samples,
                 self.target_vocab_size)
-      softmax_loss_function = sampled_loss
+        softmax_loss_function = sampled_loss
 
     # Create the internal multi-layer cell for our RNN.
     single_cell = tf.nn.rnn_cell.GRUCell(size)
@@ -169,14 +186,14 @@ class Seq2SeqModel(object):
     # Gradients and SGD update operation for training the model.
     params = tf.trainable_variables()
 
-    # Observe embedding matrix, if needed
-    self.DEBUG = 0
-    for var in params:
-        # print(var.name)  # Debug
-        if var.name == 'embedding_attention_seq2seq/RNN/EmbeddingWrapper/embedding:0':
-            self.embedding_op = var
-            self.DEBUG = 1
-            break
+    # # Observe embedding matrix, if needed
+    # self.DEBUG = 0
+    # for var in params:
+    #     # print(var.name)  # Debug
+    #     if var.name == 'embedding_attention_seq2seq/RNN/EmbeddingWrapper/embedding:0':
+    #         self.embedding_op = var
+    #         self.DEBUG = 1
+    #         break
 
     if not forward_only:
       self.gradient_norms = []
@@ -247,18 +264,18 @@ class Seq2SeqModel(object):
         output_feed.append(self.outputs[bucket_id][l])
 
     merged_summary_op = tf.summary.merge_all()
-    # outputs = session.run(output_feed, input_feed)
-    if self.DEBUG == 1:  # Debug mode
-        outputs, embedding_matrix = session.run([output_feed, self.embedding_op], input_feed)
-    else:
-        outputs = session.run(output_feed, input_feed)
+    outputs = session.run(output_feed, input_feed)
+    # if self.DEBUG == 1:  # Debug mode
+    #     outputs, embedding_matrix = session.run([output_feed, self.embedding_op], input_feed)
+    # else:
+    #     outputs = session.run(output_feed, input_feed)
 
     if not forward_only:
-    #   return outputs[1], outputs[2], None,  # Gradient norm, loss, no outputs.
-        if self.DEBUG == 1:  # Debug mode
-            return outputs[1], outputs[2], None, embedding_matrix  # Gradient norm, loss, no outputs, embedding matrix.
-        else:
-            return outputs[1], outputs[2], None, None # Gradient norm, loss, no outputs.
+      return outputs[1], outputs[2], None,  # Gradient norm, loss, no outputs.
+        # if self.DEBUG == 1:  # Debug mode
+        #     return outputs[1], outputs[2], None, embedding_matrix  # Gradient norm, loss, no outputs, embedding matrix.
+        # else:
+        #     return outputs[1], outputs[2], None, None # Gradient norm, loss, no outputs.
     else:
       return None, outputs[0], outputs[1:]  # No gradient norm, loss, outputs.
 

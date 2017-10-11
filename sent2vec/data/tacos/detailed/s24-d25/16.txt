@@ -1,0 +1,7 @@
+the person grabbed a cutting board
+the person placed the cutting board on the counter
+the person grabbed a loaf of bread
+the person grabbed a knife
+the person sliced the bread
+the person sliced only two pieces of bread off of the loaf
+the person placed the leftover loaf back in the cupboard

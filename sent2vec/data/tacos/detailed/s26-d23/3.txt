@@ -1,0 +1,8 @@
+the person entered the kitchen
+the person opened the refrigerator
+the person got a carrot
+the person got a knife and peeler from the drawer
+the person got a cutting board from the drawer
+the person washed the carrot
+the person peeled the carrot
+the person cut the carrot into pieces

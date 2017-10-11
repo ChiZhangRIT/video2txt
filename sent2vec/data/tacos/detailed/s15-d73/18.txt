@@ -1,0 +1,13 @@
+the person entered the kitchen
+the person went to the counter
+the person took out a water boiler
+the person plugged the water boiler into the counter
+the person filled the water boiler with water
+the person took out metal tea balls
+the person took out tea
+the person filled the balls
+the person went to the cabinet
+the person took out a cup
+the person poured the boiling water into the teapot
+the person poured the tea into the cup
+the person stirred the tea with a spoon

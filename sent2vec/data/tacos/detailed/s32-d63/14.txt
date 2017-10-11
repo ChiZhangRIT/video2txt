@@ -1,0 +1,17 @@
+the person entered the kitchen
+the person grabbed a toaster from the cabinet
+the person went to the cabinet
+the person grabbed a loaf of bread
+the person grabbed a plate
+the person took two slices of bread from the loaf
+the person put the loaf back in the cabinet
+the person plugged the toaster in
+the person placed the bread in
+the person opened the drawer
+the person grabbed the butter knife
+the person opened the drawer
+the person grabbed tongs
+the person removed the toast with the tongs
+the person put the butter knife away
+the person cleaned the tongs in the sink
+the person placed the tongs away

@@ -1,0 +1,9 @@
+the person entered the kitchen
+the person took a loaf of bread from the fridge
+the person took a cutting board from the drawer
+the person set a cutting board on the counter
+the person took a bread knife from the drawer
+the person set a bread knife on the cutting board
+the person took the loaf of bread out of the bad
+the person set the loaf of bread on the cutting board
+the person cut two slices of bread from the loaf using the knife

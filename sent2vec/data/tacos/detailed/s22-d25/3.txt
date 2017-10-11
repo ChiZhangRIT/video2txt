@@ -1,0 +1,12 @@
+the person entered a clean kitchen
+the person opened a cabinet
+the person removed a loaf of bread
+the person placed the bread on the countertop
+the person opened a large drawer
+the person took out a cutting board ,
+the person placed a cutting board on the countertop
+the person opened a shallow drawer
+the person took out a cutting knife
+the person put the bread on the cutting board ,
+the person cut a thin slice of bread from the loaf
+the person put down the knife
