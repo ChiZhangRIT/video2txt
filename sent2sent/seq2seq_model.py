@@ -27,7 +27,8 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.models.rnn.translate import data_utils
+# from tensorflow.models.rnn.translate import data_utils
+import data_utils
 
 
 class Seq2SeqModel(object):
@@ -99,7 +100,7 @@ class Seq2SeqModel(object):
             # train projection from scratch
             w = tf.get_variable("proj_w", [size, self.target_vocab_size])
             w_t = tf.transpose(w)
-            b = tf.get_variable("proj_b", [self.target_vocab_size])
+            bx = tf.get_variable("proj_b", [self.target_vocab_size])
         else:
             # projection using GloVe transposed
             w_init = tf.constant(np.load(pretrained_embedding_path))
@@ -107,45 +108,49 @@ class Seq2SeqModel(object):
             w = tf.transpose(w_glove)
             w_t = tf.transpose(w)
             b_init = tf.zeros([self.target_vocab_size])
-            b = tf.get_variable("proj_b", initializer=b_init, trainable=True)
-        output_projection = (w, b)
+            bx = tf.get_variable("proj_b", initializer=b_init, trainable=True)
+        output_projection = (w, bx)
 
         def sampled_loss(inputs, labels):
-            labels = tf.reshape(labels, [-1, 1])
-            return tf.nn.sampled_softmax_loss(w_t, b, inputs, labels, num_samples,
-                self.target_vocab_size)
+			# labels = tf.reshape(labels, [-1, 1])
+			ax = tf.expand_dims(inputs,1)
+			# pdb.set_trace()
+			return tf.nn.sampled_softmax_loss(w_t, bx, ax, labels, num_samples,
+				self.target_vocab_size)
         softmax_loss_function = sampled_loss
 
     # Create the internal multi-layer cell for our RNN.
-    single_cell = tf.nn.rnn_cell.GRUCell(size)
+    # single_cell = tf.contrib.rnn_cell.GRUCell(size)
+    single_cell = tf.contrib.rnn.GRUCell(size)
     if use_lstm:
-      single_cell = tf.nn.rnn_cell.BasicLSTMCell(size)
+      single_cell = tf.contrib.rnn.BasicLSTMCell(size)
     cell = single_cell
-    cell = tf.nn.rnn_cell.DropoutWrapper(cell, output_keep_prob=0.5)
+    cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=0.5)
     if num_layers > 1:
-    #   cell = tf.nn.rnn_cell.MultiRNNCell([single_cell] * num_layers)
-      cell = tf.nn.rnn_cell.MultiRNNCell([cell] * num_layers)
-
+      cell = tf.contrib.rnn.MultiRNNCell([cell for _ in range(num_layers)])
+      # cell = tf.contrib.rnn.MultiRNNCell([cell] * num_layers)
+ 
     # The seq2seq function: we use embedding for the input and attention.
     def seq2seq_f(encoder_inputs, decoder_inputs, do_decode):
         if self.use_pretrained_embedding:
-            return seq2seq_glove.embedding_attention_seq2seq(
-                encoder_inputs, decoder_inputs, cell,
-                num_encoder_symbols=source_vocab_size,
-                num_decoder_symbols=target_vocab_size,
-                embedding_size=size,
-                output_projection=output_projection,
-                feed_previous=do_decode,
-                pretrained_embedding_path=pretrained_embedding_path)
+			pdb.set_trace()
+			return seq2seq_glove.embedding_attention_seq2seq(
+				encoder_inputs, decoder_inputs, cell,
+				num_encoder_symbols=source_vocab_size,
+				num_decoder_symbols=target_vocab_size,
+				embedding_size=size,
+				output_projection=output_projection,
+				feed_previous=do_decode,
+				pretrained_embedding_path=pretrained_embedding_path)
         else:
-            return tf.nn.seq2seq.embedding_attention_seq2seq(
-                encoder_inputs, decoder_inputs, cell,
-                num_encoder_symbols=source_vocab_size,
-                num_decoder_symbols=target_vocab_size,
-                embedding_size=size,
-                output_projection=output_projection,
-                feed_previous=do_decode)
-
+			print('HELLO-----')
+			return tf.contrib.legacy.seq2seq.embedding_attention_seq2seq(
+				encoder_inputs, decoder_inputs, cell,
+				num_encoder_symbols=source_vocab_size,
+				num_decoder_symbols=target_vocab_size,
+				embedding_size=size,
+				output_projection=output_projection,
+				feed_previous=do_decode)
 
     # Feeds for inputs.
     self.encoder_inputs = []
@@ -165,10 +170,11 @@ class Seq2SeqModel(object):
 
     # Training outputs and losses.
     if forward_only:
-      self.outputs, self.losses = tf.nn.seq2seq.model_with_buckets(
+      self.outputs, self.losses = tf.contrib.legacy_seq2seq.model_with_buckets(
           self.encoder_inputs, self.decoder_inputs, targets,
           self.target_weights, buckets, lambda x, y: seq2seq_f(x, y, True),
           softmax_loss_function=softmax_loss_function)
+      # pdb.set_trace()
       # If we use output projection, we need to project outputs for decoding.
       if output_projection is not None:
         for b in xrange(len(buckets)):

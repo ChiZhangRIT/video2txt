@@ -56,7 +56,8 @@ from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
 from tensorflow.python.ops import variable_scope as vs
-from tensorflow.python.ops import rnn_cell
+# from tensorflow.python.ops import rnn_cell
+
 
 from tensorflow.python.ops.math_ops import sigmoid
 from tensorflow.python.ops.math_ops import tanh
@@ -85,8 +86,8 @@ def _state_size_with_prefix(state_size, prefix=None):
       raise TypeError("prefix of _state_size_with_prefix should be a list.")
     result_state_size = prefix + result_state_size
   return result_state_size
-
-RNNCell = rnn_cell.RNNCell
+# pdb.set_trace()
+# RNNCell = rnn_cell_impl.RNNCell
 # class RNNCell(object):
 #   """Abstract object representing an RNN cell.
 #
@@ -701,29 +702,28 @@ class EmbeddingWrapper(RNNCell):
   """
 
   def __init__(self, cell, embedding_classes, embedding_size, initializer=None):
-    """Create a cell with an added input embedding.
+	"""Create a cell with an added input embedding.
 
-    Args:
-      cell: an RNNCell, an embedding will be put before its inputs.
-      embedding_classes: integer, how many symbols will be embedded.
-      embedding_size: integer, the size of the vectors we embed into.
-      initializer: an initializer to use when creating the embedding;
-        if None, the initializer from variable scope or a default one is used.
+	Args:
+	  cell: an RNNCell, an embedding will be put before its inputs.
+	  embedding_classes: integer, how many symbols will be embedded.
+	  embedding_size: integer, the size of the vectors we embed into.
+	  initializer: an initializer to use when creating the embedding;
+		if None, the initializer from variable scope or a default one is used.
 
-    Raises:
-      TypeError: if cell is not an RNNCell.
-      ValueError: if embedding_classes is not positive.
-    """
-
-    if not isinstance(cell, RNNCell):
-      raise TypeError("The parameter cell is not RNNCell.")
-    if embedding_classes <= 0 or embedding_size <= 0:
-      raise ValueError("Both embedding_classes and embedding_size must be > 0: "
-                       "%d, %d." % (embedding_classes, embedding_size))
-    self._cell = cell
-    self._embedding_classes = embedding_classes
-    self._embedding_size = embedding_size
-    self._initializer = initializer
+	Raises:
+	  TypeError: if cell is not an RNNCell.
+	  ValueError: if embedding_classes is not positive.
+	"""
+	if not isinstance(cell, RNNCell):
+	  raise TypeError("The parameter cell is not RNNCell.")
+	if embedding_classes <= 0 or embedding_size <= 0:
+	  raise ValueError("Both embedding_classes and embedding_size must be > 0: "
+					   "%d, %d." % (embedding_classes, embedding_size))
+	self._cell = cell
+	self._embedding_classes = embedding_classes
+	self._embedding_size = embedding_size
+	self._initializer = initializer
 
   @property
   def state_size(self):

@@ -41,9 +41,11 @@ from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.ops import embedding_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
-from tensorflow.python.ops import rnn
+# from tensorflow.python.ops import rnn
+from tensorflow.contrib import rnn
 # from tensorflow.python.ops import rnn_cell
-from embedding import rnn_cell
+# from embedding import rnn_cell
+from tensorflow.contrib.rnn import RNNCell as rnn_cell
 from tensorflow.python.ops import variable_scope
 from tensorflow.python.util import nest
 
@@ -108,19 +110,23 @@ def rnn_decoder(decoder_inputs,
          states can be the same. They are different for LSTM cells though.)
   """
   with variable_scope.variable_scope(scope or "rnn_decoder"):
-    state = initial_state
-    outputs = []
-    prev = None
-    for i, inp in enumerate(decoder_inputs):
-      if loop_function is not None and prev is not None:
-        with variable_scope.variable_scope("loop_function", reuse=True):
-          inp = loop_function(prev, i)
-      if i > 0:
-        variable_scope.get_variable_scope().reuse_variables()
-      output, state = cell(inp, state)
-      outputs.append(output)
-      if loop_function is not None:
-        prev = output
+	state = initial_state
+	outputs = []
+	prev = None
+	# pdb.set_trace()
+	for i, inp in enumerate(decoder_inputs):
+	  if loop_function is not None and prev is not None:
+		with variable_scope.variable_scope("loop_function", reuse=True):
+		  inp = loop_function(prev, i)
+	  if i > 0:
+		variable_scope.get_variable_scope().reuse_variables()
+		
+	  output, state = cell(inp, state)
+	  outputs.append(output)
+	  if loop_function is not None:
+		prev = output
+	# pdb.set_trace()
+	# print('Hello')
   return outputs, state
 
 def attention_decoder(decoder_inputs,
@@ -347,12 +353,12 @@ def embedding_attention_decoder(decoder_inputs,
   if output_projection is not None:
     proj_biases = ops.convert_to_tensor(output_projection[1], dtype=dtype)
     proj_biases.get_shape().assert_is_compatible_with([num_symbols])
-
+  #pdb.set_trace()
   embedding = [v for v in tf.global_variables()
-                if v.name == "embedding_attention_seq2seq/RNN/EmbeddingWrapper/embedding:0"][0]
-
+                if v.name == "embedding_attention_seq2seq/rnn/EmbeddingWrapper/embedding:0"][0]
+  #pdb.set_trace()
   with variable_scope.variable_scope("embedding_attention_decoder", dtype=dtype) as scope:
-
+    #pdb.set_trace()
     # embedding = variable_scope.get_variable("embedding",
                                             # [num_symbols, embedding_size])
     loop_function = _extract_argmax_and_embed(
@@ -433,78 +439,79 @@ def embedding_attention_seq2seq(encoder_inputs,
         It is a 2D Tensor of shape [batch_size x cell.state_size].
   """
   with variable_scope.variable_scope("embedding_attention_seq2seq", dtype=dtype) as scope:
-    dtype = scope.dtype
+	dtype = scope.dtype
 
-    # Encoder
-    encoder_cell = copy.deepcopy(cell)
-    init = tf.constant(np.load(pretrained_embedding_path))  # use glove
-    encoder_cell = rnn_cell.EmbeddingWrapper(
-        encoder_cell, embedding_classes=num_encoder_symbols,
-        embedding_size=300, initializer=init)
+	# Encoder
+	encoder_cell = copy.deepcopy(cell)
+	init = tf.constant(np.load(pretrained_embedding_path))  # use glove
+	encoder_cell = rnn_cell.EmbeddingWrapper(
+		encoder_cell, embedding_classes=num_encoder_symbols,
+		embedding_size=300, initializer=init)
 
-    # input projection
-    # encoder_cell = rnn_cell.InputProjectionWrapper(encoder_cell, embedding_size)
+	# input projection
+	# encoder_cell = rnn_cell.InputProjectionWrapper(encoder_cell, embedding_size)
+	pdb.set_trace()
+	encoder_outputs, encoder_state = rnn.static_rnn(
+		encoder_cell, encoder_inputs, dtype=dtype)
+	pdb.set_trace()
+	# First calculate a concatenation of encoder outputs to put attention on.
+	top_states = [array_ops.reshape(e, [-1, 1, cell.output_size])
+				  for e in encoder_outputs]
+	attention_states = array_ops.concat(top_states,1 )
 
-    encoder_outputs, encoder_state = rnn.rnn(
-        encoder_cell, encoder_inputs, dtype=dtype)
+	# Decoder.
+	output_size = None
+	if output_projection is None:
+		cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
+		output_size = num_decoder_symbols
+	else:
+		cell = rnn_cell.OutputProjectionWrapper(cell, 300)  # glove szie = 300
 
-    # First calculate a concatenation of encoder outputs to put attention on.
-    top_states = [array_ops.reshape(e, [-1, 1, cell.output_size])
-                  for e in encoder_outputs]
-    attention_states = array_ops.concat(1, top_states)
+	if isinstance(feed_previous, bool):
+		# pdb.set_trace()
+		return embedding_attention_decoder(
+			  decoder_inputs,
+			  encoder_state,
+			  attention_states,
+			  cell,
+			  num_decoder_symbols,
+			  embedding_size,
+			  num_heads=num_heads,
+			  output_size=output_size,
+			  output_projection=output_projection,
+			  feed_previous=feed_previous,
+			  initial_state_attention=initial_state_attention)
 
-    # Decoder.
-    output_size = None
-    if output_projection is None:
-        cell = rnn_cell.OutputProjectionWrapper(cell, num_decoder_symbols)
-        output_size = num_decoder_symbols
-    else:
-        cell = rnn_cell.OutputProjectionWrapper(cell, 300)  # glove szie = 300
+	# If feed_previous is a Tensor, we construct 2 graphs and use cond.
+	def decoder(feed_previous_bool):
+	  reuse = None if feed_previous_bool else True
+	  with variable_scope.variable_scope(
+		  variable_scope.get_variable_scope(), reuse=reuse) as scope:
+		outputs, state = embedding_attention_decoder(
+			decoder_inputs,
+			encoder_state,
+			attention_states,
+			cell,
+			num_decoder_symbols,
+			embedding_size,
+			num_heads=num_heads,
+			output_size=output_size,
+			output_projection=output_projection,
+			feed_previous=feed_previous_bool,
+			update_embedding_for_previous=False,
+			initial_state_attention=initial_state_attention)
+		state_list = [state]
+		if nest.is_sequence(state):
+		  state_list = nest.flatten(state)
+		return outputs + state_list
 
-    if isinstance(feed_previous, bool):
-        return embedding_attention_decoder(
-              decoder_inputs,
-              encoder_state,
-              attention_states,
-              cell,
-              num_decoder_symbols,
-              embedding_size,
-              num_heads=num_heads,
-              output_size=output_size,
-              output_projection=output_projection,
-              feed_previous=feed_previous,
-              initial_state_attention=initial_state_attention)
-
-    # If feed_previous is a Tensor, we construct 2 graphs and use cond.
-    def decoder(feed_previous_bool):
-      reuse = None if feed_previous_bool else True
-      with variable_scope.variable_scope(
-          variable_scope.get_variable_scope(), reuse=reuse) as scope:
-        outputs, state = embedding_attention_decoder(
-            decoder_inputs,
-            encoder_state,
-            attention_states,
-            cell,
-            num_decoder_symbols,
-            embedding_size,
-            num_heads=num_heads,
-            output_size=output_size,
-            output_projection=output_projection,
-            feed_previous=feed_previous_bool,
-            update_embedding_for_previous=False,
-            initial_state_attention=initial_state_attention)
-        state_list = [state]
-        if nest.is_sequence(state):
-          state_list = nest.flatten(state)
-        return outputs + state_list
-
-    outputs_and_state = control_flow_ops.cond(feed_previous,
-                                              lambda: decoder(True),
-                                              lambda: decoder(False))
-    outputs_len = len(decoder_inputs)  # Outputs length same as decoder inputs.
-    state_list = outputs_and_state[outputs_len:]
-    state = state_list[0]
-    if nest.is_sequence(encoder_state):
-      state = nest.pack_sequence_as(structure=encoder_state,
-                                    flat_sequence=state_list)
-    return outputs_and_state[:outputs_len], state
+	outputs_and_state = control_flow_ops.cond(feed_previous,
+											  lambda: decoder(True),
+											  lambda: decoder(False))
+	outputs_len = len(decoder_inputs)  # Outputs length same as decoder inputs.
+	state_list = outputs_and_state[outputs_len:]
+	state = state_list[0]
+	if nest.is_sequence(encoder_state):
+	  state = nest.pack_sequence_as(structure=encoder_state,
+									flat_sequence=state_list)
+	return outputs_and_state[:outputs_len], state
