@@ -44,8 +44,8 @@ from tensorflow.python.ops import nn_ops
 # from tensorflow.python.ops import rnn
 from tensorflow.contrib import rnn
 # from tensorflow.python.ops import rnn_cell
-# from embedding import rnn_cell
-from tensorflow.contrib.rnn import RNNCell as rnn_cell
+from embedding import rnn_cell
+from tensorflow.contrib.rnn import RNNCell
 from tensorflow.python.ops import variable_scope
 from tensorflow.python.util import nest
 
